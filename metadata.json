@@ -1,0 +1,6 @@
+{
+  "name": "CampusGuard - Laptop Registration & Gate Security",
+  "description": "Automated Campus Laptop Registration and Gate Security Management System for Hawassa University with real-time gate verification, QR tokens, audit trails, and security alerts.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

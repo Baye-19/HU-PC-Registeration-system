@@ -1,0 +1,1120 @@
+# MASTER SOFTWARE ENGINEERING PROMPT: CAMPUSGUARD
+
+## ROLE AND RESPONSIBILITY
+
+Act as a senior software architect, senior full-stack developer, database engineer, UI/UX designer, cybersecurity engineer, and software testing engineer.
+
+Your task is to design, develop, implement, and deliver a complete, production-oriented enterprise web application from scratch.
+
+You are responsible for the entire software development lifecycle, including:
+- Requirements analysis
+- System architecture
+- Database design
+- Backend implementation
+- Frontend implementation
+- API development
+- Authentication and authorization
+- Real-time communication
+- Security implementation
+- Testing and debugging
+- Documentation
+- Deployment configuration
+
+Do not create a simple prototype, static dashboard, or frontend-only demonstration.
+
+Build a genuinely functional, integrated application with persistent database storage and working business logic.
+
+# 1. PROJECT OVERVIEW
+
+**Project Name:** CampusGuard
+
+**Full Name:** Automated Campus Laptop Registration and Gate Security Management System.
+
+**Institution:** Hawassa University, Ethiopia.
+
+**Project Domain:**
+- Campus security management
+- Personal asset registration
+- Hardware identification
+- Asset tracking
+- Gate access verification
+- Lost and stolen device management
+- Real-time security notifications
+- Security audit management
+
+## 1.1 Background
+
+Hawassa University currently uses a paper-based process to register students' personal laptops.
+
+Students physically visit the campus police union office, where officers manually record student information, laptop specifications, and ownership details in paper records.
+
+The existing process creates several problems:
+1. Slow registration and long queues.
+2. Difficulty retrieving historical records.
+3. Vulnerability to fraudulent ownership claims.
+4. Lack of centralized laptop identification.
+5. No immediate notification when a laptop is reported stolen or missing.
+6. Inefficient manual verification at campus exit gates.
+7. Lack of reliable IN/OUT movement records.
+8. Difficulty conducting security audits and investigations.
+
+CampusGuard must replace this manual process with a centralized digital security platform.
+
+## 1.2 Main Goal
+
+Develop a secure, responsive, scalable, and maintainable web application that digitizes laptop registration, automates device identification, enables instant gate verification, broadcasts real-time security alerts, and maintains complete audit records.
+
+# 2. REQUIRED TECHNOLOGY STACK
+
+Use the following technologies. Do not replace them with unrelated frameworks.
+
+### Frontend
+- Next.js (App Router)
+- React
+- TypeScript
+- Tailwind CSS
+- React Hook Form
+- Zod validation
+- Axios or a properly configured API client
+- Lucide React icons
+- Recharts for analytics where appropriate
+
+### Backend
+- Java
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- Hibernate
+- Spring Web
+- Spring WebSocket
+- Bean Validation
+- Maven
+- JWT-based authentication
+
+### Database
+- PostgreSQL
+- Flyway database migrations
+
+### Other Technologies
+- ZXing for QR code generation and scanning support where appropriate.
+- WebSockets for real-time notifications.
+- Swagger/OpenAPI for API documentation.
+- Docker and Docker Compose for deployment and local development.
+
+IMPORTANT ARCHITECTURAL REQUIREMENT:
+
+Use a separate Next.js frontend and Spring Boot backend.
+
+Next.js communicates with Spring Boot through REST APIs and WebSockets.
+
+Spring Boot handles all business logic, authentication, authorization, validation, and database operations.
+
+PostgreSQL is the permanent data store.
+
+Never connect the frontend directly to PostgreSQL.
+
+Do not use Firebase, Supabase, MongoDB, or browser local storage as substitutes for the required backend and database.
+
+# 3. USER ROLES AND PERMISSIONS
+
+Implement role-based access control (RBAC).
+
+Create the following roles:
+
+## 3.1 SYSTEM ADMINISTRATOR
+
+The administrator has system-wide management privileges.
+
+Permissions:
+- Access the administration dashboard.
+- Create, edit, activate, and deactivate user accounts.
+- Assign and manage roles.
+- Manage security officers.
+- Manage students.
+- Manage registered laptops.
+- Manage campus gates.
+- View all laptop registrations.
+- View all verification activities.
+- View all lost-device reports.
+- Monitor real-time security alerts.
+- View audit logs.
+- Generate reports.
+- Manage system settings.
+
+Sensitive actions must be logged.
+
+## 3.2 SECURITY OFFICER
+
+Security officers are responsible for laptop registration and ownership verification.
+
+Permissions:
+- Register laptops on behalf of students.
+- Review student-submitted registration requests.
+- Approve or reject registration requests.
+- Edit authorized registration information.
+- Generate and print QR identification labels.
+- Search registered devices.
+- View device ownership details.
+- Record verification activities.
+- Review lost-device reports.
+- Manage authorized security incidents.
+- View relevant audit history.
+
+Officers must not be able to modify administrator accounts or grant themselves additional permissions.
+
+## 3.3 STUDENT
+
+Students have their own authenticated portal.
+
+Permissions:
+- Log in securely.
+- View their profile.
+- Submit laptop registration requests.
+- View their registered laptops.
+- View registration approval status.
+- View their laptop PC ID and QR code.
+- Report a laptop as lost or stolen.
+- View the status of lost-device reports.
+- Request correction of inaccurate device information.
+- View their own relevant activity history.
+
+Students must not approve their own registrations or clear security alerts.
+
+## 3.4 GATE SECURITY OFFICER
+
+Gate officers use a simplified gate verification interface.
+
+Permissions:
+- Scan laptop QR codes.
+- Search by PC ID.
+- Search by serial number where authorized.
+- View verification results.
+- Confirm device and registered ownership information.
+- Record IN and OUT movements.
+- View active security alerts.
+- Acknowledge alerts.
+- View relevant gate activity history.
+
+Gate officers must not access administrative functions or modify laptop ownership records.
+
+# 4. AUTHENTICATION AND SECURITY
+
+Implement a complete authentication system.
+
+Required functionality:
+- Login using username or institutional email and password.
+- Secure password hashing using BCrypt.
+- JWT access-token authentication.
+- Proper token expiration and renewal strategy.
+- Logout and token invalidation strategy.
+- Role-based route protection.
+- Backend endpoint authorization.
+- Account activation and deactivation.
+- Login validation.
+- Secure error handling.
+- Protection against unauthorized access.
+
+Never store plaintext passwords.
+
+Do not trust frontend role information. Always enforce authorization on the Spring Boot backend.
+
+Use environment variables for secrets.
+
+Never hardcode production passwords, JWT secrets, or database credentials.
+
+Create an initial administrator bootstrap mechanism using environment variables or a controlled initialization process. Never expose default administrator credentials publicly.
+
+# 5. CORE SYSTEM MODULES
+
+Implement all modules below.
+
+## MODULE 1: ADMINISTRATIVE DASHBOARD
+
+Create a professional administration dashboard.
+
+Display:
+- Total registered students.
+- Total registered laptops.
+- Pending registration requests.
+- Approved registrations.
+- Rejected registrations.
+- Active lost/stolen reports.
+- Total security officers.
+- Total campus gates.
+- Today's IN movements.
+- Today's OUT movements.
+- Recent verification activities.
+- Recent security alerts.
+- Registration trends.
+- Device status statistics.
+
+Dashboard statistics must come from real database queries.
+
+Provide:
+- Sidebar navigation.
+- Responsive top navigation.
+- User profile menu.
+- Notifications panel.
+- Search functionality.
+- Date filters.
+- Pagination.
+- Loading states.
+- Empty states.
+- Error handling.
+
+Do not use fabricated statistics.
+
+## MODULE 2: STUDENT MANAGEMENT
+
+Create complete student management functionality.
+
+Student fields:
+- Full name.
+- Student ID.
+- Institutional email.
+- Department.
+- Faculty/college.
+- Academic year.
+- Phone number (optional).
+- Account status.
+
+Requirements:
+- Create student records.
+- Edit student records.
+- View student details.
+- Search students.
+- Filter students.
+- View all laptops owned by a student.
+- View student registration history.
+- Prevent duplicate student IDs.
+- Validate institutional information.
+
+An administrator can manage student records. Officers may access the information required for their duties.
+
+## MODULE 3: LAPTOP REGISTRATION
+
+This is one of the most important modules.
+
+Support two registration workflows:
+
+A. Student-submitted registration:
+1. Student logs into the portal.
+2. Student opens the laptop registration form.
+3. Student submits laptop and ownership information.
+4. System validates the information.
+5. Registration enters PENDING status.
+6. Security officer reviews the request.
+7. Officer approves or rejects it.
+8. If approved, the system generates a PC ID and QR code.
+9. Student receives a registration confirmation.
+
+B. Officer-assisted registration:
+1. Student visits the security office.
+2. Officer searches for the student or creates an authorized student record.
+3. Officer enters laptop information.
+4. Officer verifies ownership information.
+5. Officer submits the registration for approval or completes the authorized approval workflow.
+6. The system generates the PC ID and QR code after approval.
+
+Laptop information must include:
+
+Required fields:
+- Manufacturer/brand.
+- Laptop model.
+- Serial number or service tag.
+- Device type.
+- Student owner.
+- Registration date.
+
+Optional fields:
+- Processor.
+- RAM.
+- Storage capacity.
+- Operating system.
+- Laptop color.
+- Physical description.
+- Additional identifying details.
+- Laptop photograph.
+
+Requirements:
+- Validate required fields.
+- Prevent duplicate active serial numbers.
+- Allow multiple laptops per student.
+- Track registration status.
+- Store registration approval information.
+- Maintain registration history.
+- Allow authorized corrections.
+- Log important changes.
+
+Use these registration statuses:
+
+PENDING
+APPROVED
+REJECTED
+SUSPENDED
+REVOKED
+
+Do not treat an unapproved registration as a valid registered device.
+
+## MODULE 4: UNIQUE PC ID GENERATION
+
+Every approved laptop must receive a unique system-generated identifier.
+
+Example:
+
+CG-LPT-000001
+CG-LPT-000002
+CG-LPT-000003
+
+Requirements:
+- Generate IDs automatically.
+- Guarantee uniqueness under concurrent registration.
+- Never depend on frontend-generated IDs.
+- Use database-safe sequence or equivalent generation.
+- Never reuse retired identifiers.
+
+The PC ID must be independent of the laptop's manufacturer serial number.
+
+## MODULE 5: QR CODE GENERATION
+
+Generate a QR code for every approved laptop.
+
+Requirements:
+- Generate QR codes automatically after approval.
+- Associate each QR code with the corresponding laptop.
+- Allow students and authorized officers to view the QR code.
+- Allow QR code download.
+- Support printable identification stickers.
+- Provide a print-friendly QR registration card.
+- Include PC ID and basic identification information on the printable card.
+
+SECURITY REQUIREMENT:
+
+Do not place sensitive student information, passwords, or private database information directly inside the QR code.
+
+Prefer a cryptographically secure, unpredictable device-verification token or opaque identifier.
+
+The backend must validate every scanned token.
+
+A copied QR code must not be treated as proof of ownership.
+
+Implement QR token revocation and reissuance where appropriate.
+
+## MODULE 6: GATE VERIFICATION SYSTEM
+
+Build a dedicated gate security dashboard.
+
+This interface should be simple, fast, and optimized for security personnel using desktop computers, tablets, or mobile devices.
+
+Support two verification methods:
+
+1. QR code scanning.
+2. Manual search by PC ID or authorized hardware identifier.
+
+QR scanning requirements:
+- Request camera permission.
+- Support compatible browser cameras.
+- Scan QR codes.
+- Extract the verification token.
+- Send the token to Spring Boot.
+- Retrieve the actual device information from PostgreSQL.
+- Display verification results immediately.
+- Handle invalid or unreadable QR codes.
+- Handle camera permission denial.
+- Provide manual search as a fallback.
+
+Display the following information after scanning:
+
+- PC ID.
+- Student full name.
+- Student ID.
+- Laptop brand.
+- Laptop model.
+- Serial number.
+- Registration status.
+- Security status.
+- Previous movement status.
+- Last verification date.
+
+Verification outcomes:
+
+VALID:
+Device is registered and approved.
+
+REPORTED_LOST:
+Device has an active lost/stolen report.
+
+SUSPENDED:
+Device registration is suspended.
+
+REVOKED:
+Device registration has been revoked.
+
+NOT_FOUND:
+Device does not exist or the verification token is invalid.
+
+For a lost or stolen device, display a prominent warning and instruct the officer to follow the institution's security procedure.
+
+Never automatically accuse a person of theft based only on a QR result.
+
+## MODULE 7: IN/OUT MOVEMENT TRACKING
+
+Implement an auditable laptop movement system.
+
+Every verification movement must contain:
+- Laptop ID.
+- Gate ID.
+- Officer ID.
+- Movement type (IN or OUT).
+- Date and time.
+- Verification method.
+- Verification result.
+- Relevant notes.
+
+Business rules:
+
+1. A valid device can be recorded as IN when entering campus.
+2. A device currently recorded as IN can be recorded as OUT.
+3. Prevent duplicate consecutive IN or OUT events.
+4. Maintain the current movement state.
+5. Record every successful movement.
+6. Never delete historical security events during normal operations.
+7. Restrict correction of erroneous records to authorized personnel and preserve the correction audit trail.
+8. Every movement must be associated with a specific gate and responsible officer.
+
+Use transactions and concurrency-safe state transitions to prevent conflicting movement records when multiple gates scan the same device simultaneously.
+
+## MODULE 8: LOST AND STOLEN LAPTOP MANAGEMENT
+
+Create a complete missing-device reporting system.
+
+Students must be able to report their own registered laptops.
+
+Officers and administrators may also submit authorized reports.
+
+Report fields:
+- Laptop ID.
+- Reporting student.
+- Incident type.
+- Incident date.
+- Incident location.
+- Incident description.
+- Contact information.
+- Optional supporting evidence.
+
+Report statuses:
+
+SUBMITTED
+UNDER_REVIEW
+CONFIRMED
+RESOLVED
+REJECTED
+
+When a report is accepted into the active security-alert workflow:
+
+1. Update the laptop security status to REPORTED_LOST.
+2. Persist the incident report.
+3. Create a security alert.
+4. Broadcast the alert to connected gate terminals.
+5. Display the warning in the gate dashboard.
+6. Maintain a record of alert acknowledgement.
+7. Record all relevant actions.
+
+Provide the ability to:
+- Search lost laptops.
+- View incident details.
+- Review reports.
+- Confirm reports.
+- Resolve incidents.
+- Reject invalid reports.
+- Restore normal device status after an authorized resolution.
+
+Every status change must be recorded.
+
+## MODULE 9: REAL-TIME ALERT SYSTEM
+
+Use Spring Boot WebSockets.
+
+Build real-time communication between the backend and connected gate terminals.
+
+Alert events should include:
+- New missing-device report accepted.
+- Device security status changed.
+- Device report resolved.
+- Important administrative security announcements.
+
+Requirements:
+- Broadcast authorized alerts to relevant gate terminals.
+- Display alerts without page refresh.
+- Show unread alert counts.
+- Provide alert acknowledgement.
+- Record which officer acknowledged an alert.
+- Store alerts permanently in PostgreSQL.
+- Load previous alerts after reconnection.
+- Prevent duplicate alert processing.
+- Authenticate WebSocket connections.
+- Enforce role-based subscription permissions.
+
+IMPORTANT:
+
+WebSockets are for immediate communication, not permanent storage.
+
+If a gate terminal disconnects, it must retrieve missed alerts after reconnecting.
+
+Use a persistent alert identifier and reliable synchronization mechanism.
+
+## MODULE 10: AUDIT LOG MANAGEMENT
+
+Create a complete audit trail.
+
+Record important system activities:
+- User login and logout.
+- Laptop registration.
+- Registration approval or rejection.
+- Laptop information updates.
+- QR token generation and revocation.
+- Device verification.
+- IN/OUT movements.
+- Lost-device reporting.
+- Security alert creation.
+- Alert acknowledgement.
+- Incident resolution.
+- User management activities.
+- Permission changes.
+
+Each audit record should contain:
+- Actor/user ID.
+- Action.
+- Target entity.
+- Target ID.
+- Timestamp.
+- Relevant metadata.
+- IP address where available.
+- Outcome.
+
+Audit logs must be protected against ordinary modification and deletion.
+
+Provide search, filtering, and pagination.
+
+# 6. DATABASE DESIGN
+
+Use PostgreSQL with a normalized relational schema.
+
+Create the database tables and relationships required by the system.
+
+At minimum, consider these entities:
+
+1. users
+2. roles
+3. user_roles
+4. students
+5. departments
+6. faculties
+7. laptops
+8. laptop_registrations
+9. qr_tokens
+10. gates
+11. security_events
+12. lost_reports
+13. alerts
+14. alert_acknowledgements
+15. audit_logs
+
+Additional tables may be created when justified by the architecture.
+
+Database requirements:
+- Primary keys.
+- Foreign keys.
+- Unique constraints.
+- Appropriate indexes.
+- NOT NULL constraints.
+- Referential integrity.
+- Timestamp fields.
+- Proper transaction management.
+- Optimized database queries.
+- Flyway migration scripts.
+
+Define all entity relationships properly.
+
+One student can own multiple laptops.
+
+One laptop can have multiple historical registration and security records.
+
+One gate can generate many security events.
+
+One user can perform many audited activities.
+
+A lost-device report can trigger one or more relevant alerts.
+
+Do not store duplicate or unnecessary information.
+
+Do not use an unstructured database design.
+
+Create an ER diagram in the project documentation.
+
+# 7. BACKEND ARCHITECTURE
+
+Use a clean, modular Spring Boot architecture.
+
+Organize the backend into packages such as:
+
+- config
+- security
+- auth
+- user
+- role
+- student
+- department
+- laptop
+- registration
+- qr
+- gate
+- verification
+- securityevent
+- lostreport
+- notification
+- audit
+- common
+- exception
+
+Use appropriate layers:
+
+Controller
+Service
+Repository
+Entity
+DTO
+Mapper
+Validation
+
+Requirements:
+- RESTful API design.
+- DTO-based request and response models.
+- Input validation.
+- Global exception handling.
+- Transactional business operations.
+- Proper HTTP status codes.
+- Pagination and filtering.
+- Secure endpoint authorization.
+- Consistent API response formats.
+- OpenAPI documentation.
+
+Never expose JPA entities directly as public API responses.
+
+Separate business logic from controllers.
+
+# 8. FRONTEND ARCHITECTURE
+
+Build a modern Next.js application using the App Router.
+
+Organize pages by role.
+
+Suggested routes:
+
+/login
+
+/admin/dashboard
+/admin/users
+/admin/students
+/admin/officers
+/admin/laptops
+/admin/registrations
+/admin/gates
+/admin/lost-reports
+/admin/alerts
+/admin/audit-logs
+/admin/reports
+/admin/settings
+
+/officer/dashboard
+/officer/registrations
+/officer/laptops
+/officer/registration-review
+/officer/qr-cards
+/officer/lost-reports
+
+/student/dashboard
+/student/profile
+/student/laptops
+/student/register-laptop
+/student/lost-report
+/student/notifications
+
+/gate/dashboard
+/gate/scan
+/gate/search
+/gate/verification-history
+/gate/alerts
+
+Implement role-aware navigation and route protection.
+
+Create reusable components:
+- Sidebar
+- Header
+- Dashboard cards
+- Data tables
+- Search bars
+- Filter controls
+- Modal dialogs
+- Forms
+- Confirmation dialogs
+- Notification panels
+- QR code display
+- QR scanner
+- Status badges
+- Loading skeletons
+- Empty states
+- Error states
+
+Use reusable components and maintainable TypeScript types.
+
+Avoid massive single-page components.
+
+# 9. UI/UX DESIGN REQUIREMENTS
+
+The application must look like a professional enterprise security management platform.
+
+Design direction:
+
+- Modern university enterprise interface.
+- Clean and minimal design.
+- Professional typography.
+- Consistent spacing.
+- Carefully designed cards.
+- Clear data tables.
+- Intuitive navigation.
+- Responsive layouts.
+- Accessible color contrast.
+- Consistent iconography.
+
+Suggested color palette:
+
+- Primary dark navy: #142B4A
+- Secondary blue: #2563EB
+- Security green: #16A34A
+- Warning amber: #F59E0B
+- Danger red: #DC2626
+- Background: #F8FAFC
+- Surface: #FFFFFF
+- Text: #1E293B
+
+Use red only for meaningful security warnings.
+
+Create:
+- Professional login page.
+- Separate role-specific dashboards.
+- Registration forms.
+- QR scanning interface.
+- Lost-device alert interface.
+- Administrative analytics.
+- Responsive mobile views.
+
+The gate verification screen should prioritize speed and clarity over decorative design.
+
+Do not overcrowd the interface.
+
+Use realistic labels and consistent terminology.
+
+# 10. REPORTING AND ANALYTICS
+
+Implement reports based on real database records.
+
+Reports should include:
+- Total registered laptops.
+- Registration trends.
+- Student registration statistics.
+- Approved and pending registrations.
+- Lost/stolen laptop reports.
+- Resolved incidents.
+- IN/OUT movement history.
+- Gate activity.
+- Officer activity.
+
+Provide date-range filtering.
+
+Where appropriate, allow CSV export.
+
+Ensure exported data respects user permissions.
+
+# 11. API DESIGN
+
+Create properly documented REST APIs.
+
+Suggested endpoint groups:
+
+Authentication:
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+
+Students:
+GET /api/v1/students
+GET /api/v1/students/{id}
+POST /api/v1/students
+PUT /api/v1/students/{id}
+
+Laptop registration:
+POST /api/v1/registrations
+GET /api/v1/registrations
+GET /api/v1/registrations/{id}
+POST /api/v1/registrations/{id}/approve
+POST /api/v1/registrations/{id}/reject
+
+Laptops:
+GET /api/v1/laptops
+GET /api/v1/laptops/{id}
+GET /api/v1/laptops/my
+PUT /api/v1/laptops/{id}
+
+QR:
+GET /api/v1/laptops/{id}/qr
+POST /api/v1/verification/qr
+
+Verification:
+POST /api/v1/verification/search
+POST /api/v1/verification/movement
+
+Lost reports:
+POST /api/v1/lost-reports
+GET /api/v1/lost-reports
+POST /api/v1/lost-reports/{id}/review
+POST /api/v1/lost-reports/{id}/resolve
+
+Alerts:
+GET /api/v1/alerts
+POST /api/v1/alerts/{id}/acknowledge
+
+Audit:
+GET /api/v1/audit-logs
+
+Dashboard:
+GET /api/v1/dashboard/admin
+GET /api/v1/dashboard/officer
+GET /api/v1/dashboard/student
+GET /api/v1/dashboard/gate
+
+These are suggested endpoint contracts. Refine them where necessary while maintaining consistent REST conventions.
+
+All endpoints must be implemented and connected to the frontend.
+
+# 12. SECURITY AND RELIABILITY REQUIREMENTS
+
+Implement:
+- Backend-enforced RBAC.
+- Secure password storage.
+- JWT validation.
+- CORS configuration.
+- Request validation.
+- Protection against SQL injection through safe parameterized database access.
+- XSS prevention.
+- CSRF strategy appropriate to the chosen authentication mechanism.
+- Rate limiting for sensitive endpoints.
+- Secure error messages.
+- WebSocket authorization.
+- Secure environment configuration.
+- Protection against unauthorized device-status changes.
+- Transaction-safe movement recording.
+- Audit logging for sensitive actions.
+
+Do not expose confidential information in application logs.
+
+Use HTTPS in production.
+
+# 13. TESTING REQUIREMENTS
+
+Create meaningful tests.
+
+Backend:
+- Authentication tests.
+- Authorization tests.
+- Student management tests.
+- Laptop registration tests.
+- Duplicate serial number tests.
+- PC ID uniqueness tests.
+- QR verification tests.
+- IN/OUT state-transition tests.
+- Lost-device reporting tests.
+- Alert persistence tests.
+- Audit logging tests.
+
+Frontend:
+- Login validation.
+- Registration form validation.
+- Dashboard data loading.
+- QR scanner error handling.
+- Gate verification workflow.
+- Role-based navigation.
+- Lost-device reporting.
+
+Integration:
+- Frontend-to-backend communication.
+- Backend-to-PostgreSQL persistence.
+- WebSocket notifications.
+- Reconnection and missed-alert synchronization.
+
+Never claim that tests pass without actually executing them.
+
+# 14. DEPLOYMENT AND PROJECT SETUP
+
+Provide:
+
+1. Complete frontend project.
+2. Complete backend project.
+3. PostgreSQL database configuration.
+4. Flyway migrations.
+5. Dockerfiles.
+6. Docker Compose configuration.
+7. Environment variable examples.
+8. README.md.
+9. API documentation.
+10. Database ER diagram.
+11. Development instructions.
+12. Production deployment instructions.
+
+Provide commands to run the application on Windows.
+
+Example development commands:
+
+Frontend:
+npm install
+npm run dev
+
+Backend:
+mvn spring-boot:run
+
+Database:
+Use Docker Compose to start PostgreSQL.
+
+Document the expected local ports and configuration.
+
+Do not commit real secrets.
+
+# 15. IMPORTANT DEVELOPMENT RULES
+
+These instructions are mandatory.
+
+1. Build a real, functional application, not just a visual demonstration.
+2. Do not replace backend functionality with frontend mock data.
+3. Do not use hardcoded dashboard statistics.
+4. Do not create fake authentication.
+5. Do not leave buttons without working actions.
+6. Do not leave forms disconnected from backend APIs.
+7. Do not use browser local storage as the main database.
+8. Do not omit the PostgreSQL implementation.
+9. Do not skip authentication and authorization.
+10. Do not ignore backend validation.
+11. Do not create duplicate implementations of the same feature.
+12. Do not place all application logic in one file.
+13. Do not silently ignore errors.
+14. Do not invent successful test results.
+15. Maintain consistent naming across frontend, backend, and database.
+16. Make all important operations transactional where required.
+17. Ensure the application can be started using documented instructions.
+18. Never sacrifice security to make a feature appear functional.
+
+If a required feature cannot be implemented in the current environment, explain the limitation and provide the complete implementation and setup instructions rather than pretending it works.
+
+# 16. IMPLEMENTATION STRATEGY
+
+Develop the entire system in a controlled sequence.
+
+PHASE 1: Architecture and project foundation.
+- Finalize architecture.
+- Create frontend and backend projects.
+- Configure PostgreSQL.
+- Configure Flyway.
+- Establish API communication.
+- Create project documentation.
+
+PHASE 2: Authentication and user management.
+- Implement login.
+- Implement JWT security.
+- Implement RBAC.
+- Implement student, officer, and administrator accounts.
+
+PHASE 3: Laptop registration.
+- Implement registration forms.
+- Implement validation.
+- Implement registration approval.
+- Implement PC ID generation.
+- Implement QR generation.
+
+PHASE 4: Gate verification.
+- Implement QR scanning.
+- Implement manual search.
+- Implement verification results.
+- Implement IN/OUT movement recording.
+
+PHASE 5: Lost-device management.
+- Implement missing-device reports.
+- Implement incident review.
+- Implement security status management.
+- Implement WebSocket alerts.
+
+PHASE 6: Administration and reporting.
+- Implement dashboards.
+- Implement analytics.
+- Implement audit logs.
+- Implement exports.
+
+PHASE 7: Testing and production readiness.
+- Run backend tests.
+- Run frontend tests.
+- Run production builds.
+- Fix compilation errors.
+- Fix integration problems.
+- Validate security.
+- Document deployment.
+
+# 17. DELIVERY REQUIREMENTS
+
+At completion, deliver:
+
+- A complete Next.js frontend.
+- A complete Spring Boot backend.
+- A functional PostgreSQL schema.
+- All required Flyway migrations.
+- Authentication and authorization.
+- All four role-specific interfaces.
+- Functional laptop registration.
+- Unique PC ID generation.
+- QR code generation and scanning.
+- Gate verification.
+- IN/OUT tracking.
+- Lost/stolen laptop reporting.
+- Real-time WebSocket alerts.
+- Persistent notifications.
+- Complete audit logs.
+- Reporting and analytics.
+- Automated tests.
+- Docker configuration.
+- API documentation.
+- Setup and deployment documentation.
+
+# 18. FINAL INSTRUCTION
+
+Begin by analyzing the entire specification and designing the complete architecture.
+
+Then start implementing the application.
+
+Do not stop after producing the architecture, wireframes, database diagram, or frontend dashboard.
+
+Continue implementing the backend, frontend, database, integration, and testing.
+
+If the entire application cannot fit into one generation, divide the implementation into clearly defined phases.
+
+At the end of each phase:
+- List files created.
+- List files modified.
+- Explain implemented functionality.
+- Identify incomplete functionality.
+- Report compilation and test results.
+- Explain the exact next implementation step.
+
+Maintain the same architecture and naming conventions across every phase.
+
+Never claim that the complete system is finished while essential modules remain unimplemented.
+
+Your final objective is a working, secure, integrated CampusGuard application that Hawassa University could realistically deploy after institutional review, security validation, and production configuration.
+
+START WITH PHASE 1 NOW.
