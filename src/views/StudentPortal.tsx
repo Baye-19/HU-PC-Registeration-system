@@ -10,14 +10,16 @@ import {
   Clock,
   ShieldCheck,
   CheckCircle,
-  FileText
+  FileText,
+  ArrowLeft
 } from 'lucide-react';
 
 interface StudentPortalProps {
   currentUser: User;
+  onNavigateBack?: () => void;
 }
 
-export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser }) => {
+export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser, onNavigateBack }) => {
   const [activeTab, setActiveTab] = useState<'MY_LAPTOPS' | 'REGISTER' | 'REPORT_LOST'>('MY_LAPTOPS');
   const [laptops, setLaptops] = useState<Laptop[]>([]);
   const [registrations, setRegistrations] = useState<LaptopRegistration[]>([]);
@@ -165,24 +167,43 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser }) => 
 
   return (
     <div className="space-y-6">
-      {/* Student Welcome Header */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">
-            Student Self-Service Portal
-          </span>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-            Welcome, {currentUser.fullName}
-          </h1>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">
-            Student ID: {currentUser.studentId || 'HU/14022/13'} · Institutional Email: {currentUser.email}
-          </p>
+      {/* Student Welcome Header with Hawassa University Emblem */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+          {onNavigateBack && (
+            <button
+              onClick={onNavigateBack}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs mr-1 shrink-0"
+              title="Return to Dashboard"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#0B2A63]" />
+              <span className="hidden xs:inline">Back</span>
+            </button>
+          )}
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white p-0.5 shadow-xs border-2 border-[#F59E0B] flex items-center justify-center shrink-0">
+            <img
+              src="/assets/aistudio/image_3d6f99fa.png"
+              alt="Hawassa University"
+              className="w-full h-full object-contain rounded-full"
+            />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-[#0284C7] tracking-wider block truncate">
+              ሀዋሳ ዩኒቨርሲቲ · Student Portal
+            </span>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
+              Welcome, {currentUser.fullName}
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 font-mono mt-0.5 truncate">
+              Student ID: {currentUser.studentId || 'HU/14022/13'} · Email: {currentUser.email}
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 rounded-lg bg-slate-100 p-1 text-xs font-semibold">
+        <div className="flex items-center gap-1.5 sm:gap-2 rounded-lg bg-slate-100 p-1 text-xs font-semibold overflow-x-auto max-w-full no-scrollbar whitespace-nowrap shrink-0">
           <button
             onClick={() => setActiveTab('MY_LAPTOPS')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shrink-0 ${
               activeTab === 'MY_LAPTOPS' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -195,7 +216,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser }) => 
 
           <button
             onClick={() => setActiveTab('REGISTER')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shrink-0 ${
               activeTab === 'REGISTER' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -205,7 +226,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser }) => 
 
           <button
             onClick={() => setActiveTab('REPORT_LOST')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shrink-0 ${
               activeTab === 'REPORT_LOST' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -318,7 +339,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser }) => 
                     </span>
                     <button
                       onClick={() => setSelectedLaptopForPass(laptop)}
-                      className="px-3.5 py-1.5 bg-[#142B4A] hover:bg-[#1a3860] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
+                      className="px-3.5 py-1.5 bg-[#0B2A63] hover:bg-[#0E3B85] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
                     >
                       <Printer className="w-3.5 h-3.5" />
                       View Pass & Sticker

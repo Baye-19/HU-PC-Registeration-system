@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Gate, SecurityEvent, SecurityAlert } from '../types';
 import { GateScanner } from '../components/GateScanner';
-import { ShieldCheck, DoorOpen, History, Bell, Check } from 'lucide-react';
+import { ShieldCheck, DoorOpen, History, Bell, Check, ArrowLeft } from 'lucide-react';
 
 interface GateTerminalProps {
   alerts: SecurityAlert[];
   onAcknowledgeAlert: (id: string) => void;
+  onNavigateBack?: () => void;
 }
 
-export const GateTerminal: React.FC<GateTerminalProps> = ({ alerts, onAcknowledgeAlert }) => {
+export const GateTerminal: React.FC<GateTerminalProps> = ({ alerts, onAcknowledgeAlert, onNavigateBack }) => {
   const [gates, setGates] = useState<Gate[]>([]);
   const [selectedGate, setSelectedGate] = useState<Gate | null>(null);
   const [recentMovements, setRecentMovements] = useState<SecurityEvent[]>([]);
@@ -54,29 +55,43 @@ export const GateTerminal: React.FC<GateTerminalProps> = ({ alerts, onAcknowledg
   return (
     <div className="space-y-6">
       {/* Terminal Header & Station Gate Selector */}
-      <div className="bg-[#142B4A] text-white p-4 rounded-xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-xs">
-            <DoorOpen className="w-5 h-5" />
+      <div className="bg-[#0B2A63] text-white p-3.5 sm:p-4 rounded-xl shadow-md border-b-2 border-[#0284C7]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          {onNavigateBack && (
+            <button
+              onClick={onNavigateBack}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors shadow-2xs mr-1 shrink-0"
+              title="Return to Dashboard"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#F59E0B]" />
+              <span className="hidden xs:inline">Back</span>
+            </button>
+          )}
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white p-0.5 shadow-sm border-2 border-[#F59E0B] flex items-center justify-center shrink-0">
+            <img
+              src="/assets/aistudio/image_3d6f99fa.png"
+              alt="Hawassa University Official Seal"
+              className="w-full h-full object-contain rounded-full"
+            />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold tracking-tight">
+              <h1 className="text-sm sm:text-base font-bold tracking-tight truncate">
                 Campus Gate Terminal
               </h1>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono font-bold px-2 py-0.5 rounded border border-emerald-500/40">
-                STATION ONLINE
+              <span className="text-[9px] sm:text-[10px] bg-emerald-500/20 text-emerald-300 font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded border border-emerald-500/40 shrink-0">
+                ONLINE
               </span>
             </div>
-            <p className="text-xs text-blue-200">
-              Hawassa University Campus Police & Security Gate Verification Post
+            <p className="text-[11px] sm:text-xs text-[#7DD3FC] truncate">
+              ሀዋሳ ዩኒቨርሲቲ · Security Gate Clearance Post
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-blue-200 whitespace-nowrap">
-            Current Station Gate:
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="text-[11px] sm:text-xs font-semibold text-blue-200 whitespace-nowrap">
+            Gate:
           </label>
           <select
             value={selectedGate.id}
@@ -84,7 +99,7 @@ export const GateTerminal: React.FC<GateTerminalProps> = ({ alerts, onAcknowledg
               const g = gates.find(gate => gate.id === e.target.value);
               if (g) setSelectedGate(g);
             }}
-            className="text-xs font-bold bg-slate-800 text-white border border-slate-600 rounded-lg px-3 py-1.5 focus:outline-hidden"
+            className="text-xs font-bold bg-slate-800 text-white border border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-hidden"
           >
             {gates.map(gate => (
               <option key={gate.id} value={gate.id}>

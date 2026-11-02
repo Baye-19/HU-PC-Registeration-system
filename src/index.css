@@ -4,6 +4,13 @@
 @theme {
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-hu-royal: #0B2A63;
+  --color-hu-blue: #0E3B85;
+  --color-hu-lake: #0284C7;
+  --color-hu-gold: #F59E0B;
+  --color-hu-red: #DC2626;
+  --color-hu-green: #15803D;
 }
 
 body {
@@ -24,3 +31,14 @@ body {
     display: block !important;
   }
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+

@@ -117,36 +117,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   return (
     <div className="space-y-8">
       {/* Page Title & Refresh */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Campus Security Administration
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Hawassa University Automated Laptop Registration & Gate Access Control System
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4 sm:pb-5">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white p-0.5 shadow-xs border-2 border-[#F59E0B] flex items-center justify-center shrink-0">
+            <img
+              src="/assets/aistudio/image_3d6f99fa.png"
+              alt="Hawassa University"
+              className="w-full h-full object-contain rounded-full"
+            />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
+              Campus Security Administration
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate">
+              ሀዋሳ ዩኒቨርሲቲ · Automated Laptop Registration & Gate Access Control System
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={() => onNavigate('architecture')}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-2xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-2xs"
           >
-            <FileText className="w-3.5 h-3.5 text-blue-600" />
-            Spring Boot & DB Specs
+            <FileText className="w-3.5 h-3.5 text-[#0284C7]" />
+            <span className="hidden xs:inline">Spring Boot & </span>DB Specs
           </button>
           <button
             onClick={fetchStats}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-[#142B4A] hover:bg-[#1a3860] rounded-lg shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-semibold text-white bg-[#0B2A63] hover:bg-[#0E3B85] rounded-lg shadow-2xs transition-colors"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Refresh
+            <RefreshCw className="w-3.5 h-3.5 text-[#F59E0B]" />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* KPI Stat Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (

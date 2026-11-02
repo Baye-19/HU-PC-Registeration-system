@@ -667,14 +667,41 @@ class DatabaseService {
         fullName: userData.fullName.trim(),
         studentId: userData.studentId.trim(),
         institutionalEmail: userData.email.trim().toLowerCase(),
-        department: 'General Engineering',
-        faculty: 'Institute of Technology (IoT)',
-        academicYear: 1,
+        department: (userData as any).department?.trim() || 'Software Engineering',
+        faculty: (userData as any).faculty?.trim() || 'Institute of Technology (IoT)',
+        academicYear: (userData as any).academicYear ? parseInt((userData as any).academicYear) : 1,
         phone: userData.phone,
         accountStatus: 'ACTIVE',
         createdAt: new Date().toISOString()
       };
       this.db.students.push(studentRecord);
+
+      // If PC / Laptop details were provided during student creation
+      const laptopData = (userData as any).laptopDetails;
+      let createdLaptop: Laptop | undefined = undefined;
+      if (laptopData && laptopData.serialNumber && laptopData.model) {
+        const reg = this.createRegistration({
+          studentId: studentRecord.id,
+          brand: laptopData.brand || 'Dell',
+          model: laptopData.model,
+          serialNumber: laptopData.serialNumber,
+          deviceType: laptopData.deviceType || 'Laptop',
+          processor: laptopData.processor,
+          ram: laptopData.ram,
+          storage: laptopData.storage,
+          os: laptopData.os,
+          color: laptopData.color,
+          physicalDescription: laptopData.physicalDescription,
+          submittedByRole: actor.role === 'ADMIN' ? 'OFFICER' : (actor.role || 'OFFICER'),
+          submittedByUserId: actor.id,
+          autoApprove: true
+        }, actor);
+        createdLaptop = this.db.laptops.find(l => l.pcId === reg.pcId);
+      }
+      this.logAudit(actor, 'USER_CREATE', 'User', id, 'SUCCESS', `Created ${userData.role} user account for ${userData.fullName} (${userData.email})${createdLaptop ? ` with Laptop ${createdLaptop.pcId}` : ''}`);
+      this.save();
+      const { passwordHash, ...rest } = newUser;
+      return { ...rest, student: studentRecord, createdLaptop };
     }
 
     this.logAudit(actor, 'USER_CREATE', 'User', id, 'SUCCESS', `Created ${userData.role} user account for ${userData.fullName} (${userData.email})`);

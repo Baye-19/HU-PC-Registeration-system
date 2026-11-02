@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { SecurityEvent } from '../types';
-import { History, Download, RefreshCw, Search } from 'lucide-react';
+import { History, Download, RefreshCw, Search, ArrowLeft } from 'lucide-react';
 
-export const MovementsView: React.FC = () => {
+interface MovementsViewProps {
+  onNavigateBack?: () => void;
+}
+
+export const MovementsView: React.FC<MovementsViewProps> = ({ onNavigateBack }) => {
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [movementFilter, setMovementFilter] = useState<'ALL' | 'IN' | 'OUT'>('ALL');
@@ -67,27 +71,39 @@ export const MovementsView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-            Campus Gate Movements History
-          </h1>
-          <p className="text-xs text-slate-500">
-            Real-time auditable entry and exit activity records across all Hawassa University perimeter gates
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          {onNavigateBack && (
+            <button
+              onClick={onNavigateBack}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs mr-1 shrink-0"
+              title="Return to Overview"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#0B2A63]" />
+              <span className="hidden xs:inline">Back</span>
+            </button>
+          )}
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
+              Campus Gate Movements History
+            </h1>
+            <p className="text-[11px] sm:text-xs text-slate-500 truncate">
+              Real-time auditable entry and exit activity records across all Hawassa University perimeter gates
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-2xs"
           >
             <Download className="w-3.5 h-3.5 text-blue-600" />
-            Export CSV
+            <span>Export CSV</span>
           </button>
           <button
             onClick={fetchEvents}
-            className="p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-300 rounded-lg"
+            className="p-1.5 sm:p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-300 rounded-lg"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -95,7 +111,7 @@ export const MovementsView: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
         <div className="relative flex-1">
           <input
             type="text"
@@ -107,10 +123,10 @@ export const MovementsView: React.FC = () => {
           <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" />
         </div>
 
-        <div className="flex items-center rounded-lg bg-slate-100 p-1 text-xs font-semibold">
+        <div className="flex items-center rounded-lg bg-slate-100 p-1 text-xs font-semibold overflow-x-auto no-scrollbar whitespace-nowrap">
           <button
             onClick={() => setMovementFilter('ALL')}
-            className={`px-3 py-1.5 rounded-md ${
+            className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
               movementFilter === 'ALL' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
             }`}
           >
@@ -118,7 +134,7 @@ export const MovementsView: React.FC = () => {
           </button>
           <button
             onClick={() => setMovementFilter('IN')}
-            className={`px-3 py-1.5 rounded-md ${
+            className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
               movementFilter === 'IN' ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-600'
             }`}
           >
@@ -126,7 +142,7 @@ export const MovementsView: React.FC = () => {
           </button>
           <button
             onClick={() => setMovementFilter('OUT')}
-            className={`px-3 py-1.5 rounded-md ${
+            className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
               movementFilter === 'OUT' ? 'bg-white text-amber-700 shadow-xs' : 'text-slate-600'
             }`}
           >
@@ -138,7 +154,7 @@ export const MovementsView: React.FC = () => {
       {/* Movements Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full min-w-[760px] text-left text-xs">
             <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase font-semibold text-[10px] tracking-wider">
               <tr>
                 <th className="py-2.5 px-3">Timestamp</th>

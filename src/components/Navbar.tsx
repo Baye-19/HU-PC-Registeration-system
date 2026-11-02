@@ -6,7 +6,6 @@ interface NavbarProps {
   currentUser: User | null;
   activeTab: string;
   onSelectTab: (tab: string) => void;
-  onSwitchRole: (role: Role) => void;
   onLogout: () => void;
   alerts: SecurityAlert[];
   onAcknowledgeAlert?: (id: string) => void;
@@ -16,7 +15,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   activeTab,
   onSelectTab,
-  onSwitchRole,
   onLogout,
   alerts,
   onAcknowledgeAlert
@@ -79,30 +77,34 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navLinks = getNavLinks();
 
   return (
-    <header className="sticky top-0 z-40 bg-[#142B4A] text-white border-b border-slate-700/60 shadow-md">
+    <header className="sticky top-0 z-40 bg-[#0B2A63] text-white border-b-2 border-[#0284C7]/30 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
-        {/* Zone 1: Brand Wordmark (Single line, display face) */}
+        {/* Zone 1: Brand Wordmark (Single line, display face with official university seal) */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => onSelectTab('dashboard')}
-            className="flex items-center gap-2.5 text-left focus:outline-hidden"
+            className="flex items-center gap-3 text-left focus:outline-hidden group"
           >
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-sm shadow-xs border border-blue-400">
-              CG
+            <div className="relative w-10 h-10 rounded-full bg-white p-0.5 shadow-sm border-2 border-[#F59E0B] flex items-center justify-center shrink-0">
+              <img
+                src="/assets/aistudio/image_3d6f99fa.png"
+                alt="Hawassa University Seal"
+                className="w-full h-full object-contain rounded-full"
+              />
             </div>
             <div className="whitespace-nowrap">
-              <span className="text-base font-bold tracking-tight text-white block leading-none">
+              <span className="text-base font-bold tracking-tight text-white block leading-tight">
                 CampusGuard
               </span>
-              <span className="text-[10px] text-blue-200 uppercase tracking-widest font-mono">
-                Hawassa University
+              <span className="text-[10px] text-[#7DD3FC] uppercase tracking-wider font-semibold block">
+                Hawassa University · 1976
               </span>
             </div>
           </button>
         </div>
 
         {/* Zone 2: Navigation Links (1-2 word single-line labels with hover underlines) */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
+        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-200">
           {navLinks.map(link => {
             const isActive = activeTab === link.id;
             return (
@@ -111,8 +113,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onSelectTab(link.id)}
                 className={`whitespace-nowrap shrink-0 transition-colors py-1 ${
                   isActive
-                    ? 'text-white border-b-2 border-blue-400 font-bold'
-                    : 'hover:text-white hover:border-b-2 hover:border-slate-400'
+                    ? 'text-white border-b-2 border-[#F59E0B] font-bold text-[#F8FAFC]'
+                    : 'hover:text-white hover:border-b-2 hover:border-[#38BDF8]/60 text-slate-300'
                 }`}
               >
                 {link.label}
@@ -127,12 +129,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="relative">
             <button
               onClick={() => setAlertsOpen(!alertsOpen)}
-              className="relative p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              className="relative p-2 text-slate-300 hover:text-white rounded-lg hover:bg-[#0E3B85] transition-colors"
               title="Security Alerts"
             >
               <Bell className="w-4 h-4" />
               {unreadAlertsCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white rounded-full text-[9px] font-bold flex items-center justify-center font-mono">
+                <span className="absolute top-1 right-1 w-4 h-4 bg-[#DC2626] text-white rounded-full text-[9px] font-bold flex items-center justify-center font-mono">
                   {unreadAlertsCount}
                 </span>
               )}
@@ -142,8 +144,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             {alertsOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 text-slate-900 overflow-hidden z-50">
                 <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-xs">
-                    <ShieldAlert className="w-4 h-4 text-red-600" />
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-[#0B2A63]">
+                    <ShieldAlert className="w-4 h-4 text-[#DC2626]" />
                     <span>Real-Time Security Broadcasts</span>
                   </div>
                   <span className="text-[10px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-bold">
@@ -159,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ) : (
                     activeAlerts.map(alert => (
                       <div key={alert.id} className="p-3 hover:bg-slate-50 transition-colors text-xs space-y-1">
-                        <div className="flex items-center justify-between font-bold text-red-700">
+                        <div className="flex items-center justify-between font-bold text-[#DC2626]">
                           <span className="truncate">{alert.title}</span>
                           <span className="text-[9px] font-mono text-slate-400">
                             {new Date(alert.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -170,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <div className="pt-1 flex justify-end">
                             <button
                               onClick={() => onAcknowledgeAlert(alert.id)}
-                              className="text-[10px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
+                              className="text-[10px] text-[#0284C7] hover:text-[#0369A1] font-semibold flex items-center gap-1"
                             >
                               <Check className="w-3 h-3" />
                               Acknowledge
@@ -185,55 +187,40 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* Sandbox Role Switcher Dropdown */}
+          {/* User Account Menu */}
           <div className="relative">
             <button
               onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#0E3B85] hover:bg-[#1249A3] text-white border border-[#38BDF8]/40 shadow-xs transition-colors"
             >
               <span className="truncate max-w-[130px]">
-                {currentUser ? roleLabels[currentUser.role] : 'Guest'}
+                {currentUser ? currentUser.fullName.split(' ')[0] : 'Account'}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-amber-300" />
             </button>
 
             {roleMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 text-slate-900 py-1.5 z-50 text-xs">
-                <div className="px-3 py-2 border-b border-slate-100 text-[11px] text-slate-500">
-                  <p className="font-semibold text-slate-800">{currentUser?.fullName}</p>
-                  <p className="truncate text-[10px] font-mono text-slate-400">{currentUser?.email}</p>
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 text-slate-900 py-2 z-50 text-xs">
+                <div className="px-4 py-2.5 border-b border-slate-100">
+                  <p className="font-bold text-slate-900 text-xs">{currentUser?.fullName}</p>
+                  <p className="truncate text-[11px] font-mono text-slate-500 mt-0.5">{currentUser?.email}</p>
+                  <div className="mt-2">
+                    <span className="inline-block px-2 py-0.5 text-[10px] font-mono font-bold bg-blue-50 text-[#0B2A63] border border-blue-200 rounded">
+                      {currentUser ? roleLabels[currentUser.role] : 'Guest'}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                  Test Role Perspectives:
-                </div>
-
-                {(['ADMIN', 'OFFICER', 'STUDENT', 'GATE_OFFICER'] as Role[]).map(role => (
-                  <button
-                    key={role}
-                    onClick={() => {
-                      onSwitchRole(role);
-                      setRoleMenuOpen(false);
-                    }}
-                    className={`w-full px-3 py-2 text-left flex items-center justify-between hover:bg-slate-50 transition-colors ${
-                      currentUser?.role === role ? 'font-bold text-blue-600 bg-blue-50/50' : 'text-slate-700'
-                    }`}
-                  >
-                    <span>{roleLabels[role]}</span>
-                    {currentUser?.role === role && <Check className="w-3.5 h-3.5 text-blue-600" />}
-                  </button>
-                ))}
-
-                <div className="border-t border-slate-100 mt-1 pt-1">
+                <div className="pt-1">
                   <button
                     onClick={() => {
                       setRoleMenuOpen(false);
                       onLogout();
                     }}
-                    className="w-full px-3 py-2 text-left text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
+                    className="w-full px-4 py-2.5 text-left text-red-600 hover:bg-red-50 flex items-center gap-2 font-semibold transition-colors"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
+                    <LogOut className="w-4 h-4 text-red-500" />
+                    <span>Sign Out of CampusGuard</span>
                   </button>
                 </div>
               </div>

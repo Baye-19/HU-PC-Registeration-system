@@ -7,7 +7,7 @@ export async function generateQrDataUrl(text: string): Promise<string> {
       margin: 1,
       width: 320,
       color: {
-        dark: '#142B4A',
+        dark: '#0B2A63',
         light: '#FFFFFF'
       }
     });

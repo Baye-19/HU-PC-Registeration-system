@@ -179,9 +179,9 @@ export const GateScanner: React.FC<GateScannerProps> = ({ currentGate, onMovemen
   return (
     <div className="space-y-6">
       {/* Top Method Tabs */}
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
             Gate Verification Terminal
           </h2>
           <p className="text-xs text-slate-500">
@@ -189,24 +189,24 @@ export const GateScanner: React.FC<GateScannerProps> = ({ currentGate, onMovemen
           </p>
         </div>
 
-        <div className="flex items-center rounded-lg bg-slate-100 p-1 text-xs font-medium">
+        <div className="flex items-center rounded-lg bg-slate-100 p-1 text-xs font-medium w-full sm:w-auto">
           <button
             onClick={() => setSearchMethod('CAMERA')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
-              searchMethod === 'CAMERA' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
+              searchMethod === 'CAMERA' ? 'bg-white text-slate-900 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Camera className="w-3.5 h-3.5 text-blue-600" />
-            QR Scanner
+            <span>QR Scanner</span>
           </button>
           <button
             onClick={() => setSearchMethod('MANUAL')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
-              searchMethod === 'MANUAL' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md transition-colors ${
+              searchMethod === 'MANUAL' ? 'bg-white text-slate-900 shadow-xs font-semibold' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Search className="w-3.5 h-3.5 text-slate-600" />
-            Manual PC ID / Serial
+            <span>Manual ID / S/N</span>
           </button>
         </div>
       </div>
@@ -327,7 +327,7 @@ export const GateScanner: React.FC<GateScannerProps> = ({ currentGate, onMovemen
                 <button
                   type="submit"
                   disabled={loading || !identifierInput.trim()}
-                  className="w-full py-2 px-4 bg-[#142B4A] hover:bg-[#1a3860] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="w-full py-2 px-4 bg-[#0B2A63] hover:bg-[#0E3B85] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   {loading ? 'Searching...' : 'Verify Device'}
                 </button>
@@ -458,8 +458,8 @@ export const GateScanner: React.FC<GateScannerProps> = ({ currentGate, onMovemen
 
               {/* Device and Student Details */}
               {verificationResult.laptop && (
-                <div className="p-6 space-y-5">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pb-4 border-b border-slate-100 text-xs">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 pb-4 border-b border-slate-100 text-xs">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-400 block">
                         Assigned PC ID
@@ -583,7 +583,7 @@ export const GateScanner: React.FC<GateScannerProps> = ({ currentGate, onMovemen
                       </div>
                     )}
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                       <button
                         onClick={() => handleRecordMovement('IN')}
                         disabled={movementLoading}

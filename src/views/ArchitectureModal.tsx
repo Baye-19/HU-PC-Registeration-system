@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Database, Server, ShieldCheck, Code, Copy, Check, Terminal, Layers } from 'lucide-react';
+import { Database, Server, ShieldCheck, Code, Copy, Check, Terminal, Layers, ArrowLeft } from 'lucide-react';
 
-export const ArchitectureView: React.FC = () => {
+interface ArchitectureViewProps {
+  onNavigateBack?: () => void;
+}
+
+export const ArchitectureView: React.FC<ArchitectureViewProps> = ({ onNavigateBack }) => {
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FLYWAY' | 'ERD' | 'DOCKER' | 'API'>('OVERVIEW');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
@@ -295,23 +299,35 @@ volumes:
     <div className="space-y-6">
       {/* Title */}
       <div className="border-b border-slate-200 pb-4">
-        <div className="flex items-center gap-2 text-blue-600 mb-1">
-          <Layers className="w-4 h-4" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Enterprise Architecture</span>
+        <div className="flex items-center gap-2 sm:gap-3 mb-2 min-w-0">
+          {onNavigateBack && (
+            <button
+              onClick={onNavigateBack}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs mr-1 shrink-0"
+              title="Return to Overview"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#0B2A63]" />
+              <span className="hidden xs:inline">Back</span>
+            </button>
+          )}
+          <div className="flex items-center gap-2 text-blue-600 min-w-0">
+            <Layers className="w-4 h-4 shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-wider truncate">Enterprise Architecture</span>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+        <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
           System Architecture & Spring Boot Specifications
         </h1>
-        <p className="text-xs text-slate-500">
+        <p className="text-[11px] sm:text-xs text-slate-500">
           Hawassa University CampusGuard Technical Documentation, Flyway Migrations, and Deployment Guide
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-semibold overflow-x-auto no-scrollbar whitespace-nowrap">
         <button
           onClick={() => setActiveTab('OVERVIEW')}
-          className={`px-3 py-1.5 rounded-md transition-colors ${
+          className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
             activeTab === 'OVERVIEW' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -319,7 +335,7 @@ volumes:
         </button>
         <button
           onClick={() => setActiveTab('FLYWAY')}
-          className={`px-3 py-1.5 rounded-md transition-colors ${
+          className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
             activeTab === 'FLYWAY' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -327,7 +343,7 @@ volumes:
         </button>
         <button
           onClick={() => setActiveTab('ERD')}
-          className={`px-3 py-1.5 rounded-md transition-colors ${
+          className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
             activeTab === 'ERD' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -335,7 +351,7 @@ volumes:
         </button>
         <button
           onClick={() => setActiveTab('DOCKER')}
-          className={`px-3 py-1.5 rounded-md transition-colors ${
+          className={`px-3 py-1.5 rounded-md transition-colors shrink-0 ${
             activeTab === 'DOCKER' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
           }`}
         >
