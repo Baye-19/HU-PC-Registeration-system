@@ -10,8 +10,7 @@ import {
   DoorOpen,
   ArrowRightCircle,
   ArrowLeftCircle,
-  RefreshCw,
-  FileText
+  RefreshCw
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -137,13 +136,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => onNavigate('architecture')}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-2xs"
-          >
-            <FileText className="w-3.5 h-3.5 text-[#0284C7]" />
-            <span className="hidden xs:inline">Spring Boot & </span>DB Specs
-          </button>
           <button
             onClick={fetchStats}
             className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-semibold text-white bg-[#0B2A63] hover:bg-[#0E3B85] rounded-lg shadow-2xs transition-colors"

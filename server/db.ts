@@ -761,6 +761,7 @@ class DatabaseService {
     os?: string;
     color?: string;
     physicalDescription?: string;
+    ownerPhone?: string;
     submittedByRole: 'STUDENT' | 'OFFICER';
     submittedByUserId: string;
     autoApprove?: boolean;
@@ -776,6 +777,8 @@ class DatabaseService {
     if (existingActive) {
       throw new Error(`Duplicate Serial Number: Laptop with serial ${cleanSerial} is already registered under PC ID ${existingActive.pcId}`);
     }
+
+    const ownerPhone = (data.ownerPhone || student.phone || '')?.trim();
 
     const regId = `reg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newReg: LaptopRegistration = {
@@ -795,6 +798,7 @@ class DatabaseService {
       os: data.os?.trim(),
       color: data.color?.trim(),
       physicalDescription: data.physicalDescription?.trim(),
+      ownerPhone,
       status: data.autoApprove ? 'APPROVED' : 'PENDING',
       registrationDate: new Date().toISOString(),
       submittedByRole: data.submittedByRole,
@@ -828,6 +832,7 @@ class DatabaseService {
         os: newReg.os,
         color: newReg.color,
         physicalDescription: newReg.physicalDescription,
+        ownerPhone,
         status: 'APPROVED',
         securityStatus: 'NORMAL',
         qrToken,
@@ -886,6 +891,7 @@ class DatabaseService {
       os: reg.os,
       color: reg.color,
       physicalDescription: reg.physicalDescription,
+      ownerPhone: reg.ownerPhone,
       status: 'APPROVED',
       securityStatus: 'NORMAL',
       qrToken,
@@ -1123,7 +1129,7 @@ class DatabaseService {
     return report;
   }
 
-  public reviewLostReport(reportId: string, status: 'CONFIRMED' | 'REJECTED', notes: string, actor: any) {
+  public reviewLostReport(reportId: string, status: any, notes: string, actor: any) {
     const rep = this.db.lostReports.find(r => r.id === reportId);
     if (!rep) throw new Error('Report not found');
 
@@ -1134,17 +1140,35 @@ class DatabaseService {
 
     const laptop = this.db.laptops.find(l => l.id === rep.laptopId);
     if (laptop) {
-      if (status === 'CONFIRMED') {
+      if (status === 'CONFIRMED' || status === 'UNDER_EXECUTION') {
         laptop.securityStatus = 'REPORTED_LOST';
-        this.createSecurityAlert({
-          type: 'LOST_DEVICE',
-          title: `ALERT: Confirmed Lost Laptop [${laptop.pcId}]`,
-          message: `${laptop.brand} ${laptop.model} reported missing. Student: ${rep.reportingStudentName}. Gate officers: detain device upon scan.`,
-          severity: 'HIGH',
-          laptopId: laptop.id,
-          pcId: laptop.pcId,
-          lostReportId: rep.id
-        }, actor);
+        if (status === 'UNDER_EXECUTION') {
+          this.createSecurityAlert({
+            type: 'LOST_DEVICE',
+            title: `ACTION: Stolen PC Under Execution [${laptop.pcId}]`,
+            message: `${laptop.brand} ${laptop.model} investigation & gate guard tracking is actively UNDER EXECUTION. Notes: ${notes}`,
+            severity: 'HIGH',
+            laptopId: laptop.id,
+            pcId: laptop.pcId,
+            lostReportId: rep.id
+          }, actor);
+        } else {
+          this.createSecurityAlert({
+            type: 'LOST_DEVICE',
+            title: `ALERT: Confirmed Lost Laptop [${laptop.pcId}]`,
+            message: `${laptop.brand} ${laptop.model} reported missing. Student: ${rep.reportingStudentName}. Gate officers: detain device upon scan.`,
+            severity: 'HIGH',
+            laptopId: laptop.id,
+            pcId: laptop.pcId,
+            lostReportId: rep.id
+          }, actor);
+        }
+      } else if (status === 'FOUND' || status === 'RESOLVED') {
+        laptop.securityStatus = 'NORMAL';
+        rep.status = 'FOUND';
+        rep.resolvedAt = new Date().toISOString();
+        const alt = this.db.alerts.find(a => a.lostReportId === reportId);
+        if (alt) alt.active = false;
       } else if (status === 'REJECTED') {
         laptop.securityStatus = 'NORMAL';
       }
@@ -1159,8 +1183,8 @@ class DatabaseService {
     const rep = this.db.lostReports.find(r => r.id === reportId);
     if (!rep) throw new Error('Report not found');
 
-    rep.status = 'RESOLVED';
-    rep.reviewNotes = (rep.reviewNotes ? rep.reviewNotes + ' | ' : '') + `Resolved: ${resolutionNotes}`;
+    rep.status = 'FOUND';
+    rep.reviewNotes = (rep.reviewNotes ? rep.reviewNotes + ' | ' : '') + `Device Found: ${resolutionNotes}`;
     rep.resolvedAt = new Date().toISOString();
 
     const laptop = this.db.laptops.find(l => l.id === rep.laptopId);
@@ -1174,7 +1198,7 @@ class DatabaseService {
       alt.active = false;
     }
 
-    this.logAudit(actor, 'LOST_REPORT_RESOLVE', 'LostReport', reportId, 'SUCCESS', `Resolved incident for ${rep.pcId}. Device security status restored to NORMAL.`);
+    this.logAudit(actor, 'LOST_REPORT_FOUND', 'LostReport', reportId, 'SUCCESS', `Device FOUND and verified for ${rep.pcId}. Device security status restored to NORMAL.`);
     this.save();
     return rep;
   }

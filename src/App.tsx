@@ -11,7 +11,6 @@ import { GateTerminal } from './views/GateTerminal';
 import { StudentsManagementView } from './views/StudentsManagementView';
 import { MovementsView } from './views/MovementsView';
 import { AuditLogsView } from './views/AuditLogsView';
-import { ArchitectureView } from './views/ArchitectureModal';
 
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -210,9 +209,6 @@ export const App: React.FC = () => {
               {activeTab === 'audit-logs' && (
                 <AuditLogsView onNavigateBack={handleNavigateBack} />
               )}
-              {activeTab === 'architecture' && (
-                <ArchitectureView onNavigateBack={handleNavigateBack} />
-              )}
             </>
           )}
 
@@ -254,9 +250,6 @@ export const App: React.FC = () => {
               )}
               {activeTab === 'audit-logs' && (
                 <AuditLogsView onNavigateBack={handleNavigateBack} />
-              )}
-              {activeTab === 'architecture' && (
-                <ArchitectureView onNavigateBack={handleNavigateBack} />
               )}
             </>
           )}

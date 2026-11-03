@@ -48,6 +48,7 @@ export interface LaptopRegistration {
   os?: string;
   color?: string;
   physicalDescription?: string;
+  ownerPhone?: string;
   status: RegistrationStatus;
   registrationDate: string;
   submittedByRole: 'STUDENT' | 'OFFICER';
@@ -78,6 +79,7 @@ export interface Laptop {
   os?: string;
   color?: string;
   physicalDescription?: string;
+  ownerPhone?: string;
   status: RegistrationStatus;
   securityStatus: SecurityStatus;
   qrToken: string;
@@ -131,7 +133,9 @@ export type LostIncidentType =
 export type LostReportStatus =
   | 'SUBMITTED'
   | 'UNDER_REVIEW'
+  | 'UNDER_EXECUTION'
   | 'CONFIRMED'
+  | 'FOUND'
   | 'RESOLVED'
   | 'REJECTED';
 

@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   QrCode,
   ShieldCheck,
+  ShieldAlert,
   Cpu,
   HardDrive,
   HardDriveDownload,
@@ -76,6 +77,13 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
 
   // Modal to display newly issued PrintableCard pass
   const [activePrintLaptop, setActivePrintLaptop] = useState<Laptop | null>(null);
+
+  // Stolen / Miss Emergency Direct Broadcast
+  const [stolenLaptop, setStolenLaptop] = useState<Laptop | null>(null);
+  const [stolenLocation, setStolenLocation] = useState('Hawassa University Main Campus');
+  const [stolenNotes, setStolenNotes] = useState('');
+  const [stolenSubmitting, setStolenSubmitting] = useState(false);
+  const [stolenSuccessMsg, setStolenSuccessMsg] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -199,6 +207,45 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
     }
   };
 
+  const handleFlagStolen = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stolenLaptop) return;
+    setStolenSubmitting(true);
+    try {
+      await api.createLostReport({
+        laptopId: stolenLaptop.id,
+        incidentType: 'THEFT_ON_CAMPUS',
+        incidentDate: new Date().toISOString(),
+        incidentLocation: stolenLocation.trim() || 'Hawassa Main Campus',
+        description: stolenNotes.trim() || `Administrative action: Reported stolen/missing without student login. Serial: ${stolenLaptop.serialNumber}. Alert dispatched to all gate terminals.`,
+        contactPhone: '+251 46 220 5311'
+      });
+      setStolenSuccessMsg(`🚨 Alert Broadcasted: PC ID ${stolenLaptop.pcId} (${stolenLaptop.brand} ${stolenLaptop.model}) is now flagged as STOLEN across all gates!`);
+      setStolenLaptop(null);
+      await fetchData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to broadcast stolen alert');
+    } finally {
+      setStolenSubmitting(false);
+    }
+  };
+
+  const handleMarkRecovered = async (laptop: Laptop) => {
+    const notes = prompt(`Confirm recovery for PC ID ${laptop.pcId}. Enter resolution notes:`, 'Hardware verified and returned to authorized owner.');
+    if (!notes) return;
+    try {
+      const reports = await api.getLostReports();
+      const rep = reports.find(r => (r.laptopId === laptop.id || r.pcId === laptop.pcId) && r.status !== 'RESOLVED');
+      if (rep) {
+        await api.resolveLostReport(rep.id, notes);
+      }
+      setStolenSuccessMsg(`✅ PC ID ${laptop.pcId} recovered and restored to NORMAL.`);
+      await fetchData();
+    } catch (err: any) {
+      alert(err.message || 'Failed to mark recovered');
+    }
+  };
+
   const departments = Array.from(new Set(students.map(s => s.department)));
 
   const filteredStudents = students.filter(s => {
@@ -257,6 +304,21 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
           </button>
         </div>
       </div>
+
+      {stolenSuccessMsg && (
+        <div className="p-3.5 bg-red-50 border border-red-300 rounded-xl text-xs text-red-900 font-semibold flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-red-600 shrink-0" />
+            <span>{stolenSuccessMsg}</span>
+          </div>
+          <button
+            onClick={() => setStolenSuccessMsg(null)}
+            className="text-red-600 hover:text-red-800 text-xs px-2 py-0.5 rounded bg-red-100 hover:bg-red-200 shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Filters & Search */}
       <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
@@ -457,12 +519,37 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
                         >
                           {lpt.securityStatus}
                         </span>
+
+                        {lpt.securityStatus === 'REPORTED_LOST' ? (
+                          <button
+                            onClick={() => handleMarkRecovered(lpt)}
+                            className="px-2 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200 flex items-center gap-1 transition-colors"
+                            title="Mark recovered and clear perimeter gate alerts"
+                          >
+                            <CheckCircle className="w-3 h-3 text-emerald-600" />
+                            <span>Recovered</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setStolenLaptop(lpt);
+                              setStolenLocation('Hawassa Main Campus');
+                              setStolenNotes(`Administrative alert: Reported stolen/missing directly from Student Management without student login. Serial: ${lpt.serialNumber}`);
+                            }}
+                            className="px-2 py-1 text-[11px] font-bold text-red-700 bg-red-50 hover:bg-red-100 rounded border border-red-300 flex items-center gap-1 transition-colors shadow-2xs"
+                            title="Flag as stolen/missing and broadcast perimeter alert to all gates without student"
+                          >
+                            <ShieldAlert className="w-3 h-3 text-red-600" />
+                            <span>Stolen / Miss</span>
+                          </button>
+                        )}
+
                         <button
                           onClick={() => {
                             setActivePrintLaptop(lpt);
                             setSelectedStudent(null);
                           }}
-                          className="px-2 py-1 text-[11px] font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 flex items-center gap-1"
+                          className="px-2 py-1 text-[11px] font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 flex items-center gap-1 transition-colors"
                           title="View / Print Hawassa University Security Clearance Pass"
                         >
                           <QrCode className="w-3 h-3 text-[#0B2A63]" />
@@ -981,6 +1068,116 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
           laptop={activePrintLaptop}
           onClose={() => setActivePrintLaptop(null)}
         />
+      )}
+
+      {/* EMERGENCY STOLEN / MISS BROADCAST MODAL */}
+      {stolenLaptop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-red-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-red-100 text-red-700 rounded-lg shrink-0">
+                  <ShieldAlert className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Emergency Stolen / Miss Broadcast
+                  </h3>
+                  <p className="text-xs text-red-700 font-medium">
+                    Instant Gate Alarm Alert (No Student Login Required)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStolenLaptop(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 space-y-1">
+              <div className="font-bold flex items-center gap-1.5 text-red-800">
+                <span>⚠️ Perimeter Security Notice</span>
+              </div>
+              <p className="text-[11px] text-red-700 leading-relaxed">
+                Flagging this laptop immediately updates its security state to <strong>REPORTED STOLEN</strong> and pushes live alerts to all campus gate officer scanner stations.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold text-slate-400">Target Laptop</span>
+                <span className="font-mono font-bold text-[#0B2A63] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                  {stolenLaptop.pcId}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-slate-700">
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Model</span>
+                  <span className="font-semibold text-slate-900">{stolenLaptop.brand} {stolenLaptop.model}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Serial Number</span>
+                  <span className="font-mono text-slate-900 font-bold">{stolenLaptop.serialNumber}</span>
+                </div>
+                <div className="col-span-2 pt-1 border-t border-slate-200">
+                  <span className="text-[10px] text-slate-400 block">Student Owner</span>
+                  <span className="font-medium text-slate-900">{stolenLaptop.studentName} ({stolenLaptop.studentIdNumber})</span>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleFlagStolen} className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Incident Location *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Female Dorm 42, Library, IoT Cafe"
+                  value={stolenLocation}
+                  onChange={e => setStolenLocation(e.target.value)}
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Incident Notes / Circumstances *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={stolenNotes}
+                  onChange={e => setStolenNotes(e.target.value)}
+                  placeholder="Describe incident or police report file number..."
+                  className="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-red-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setStolenLaptop(null)}
+                  className="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={stolenSubmitting}
+                  className="px-4 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <ShieldAlert className="w-4 h-4 text-white" />
+                  <span>{stolenSubmitting ? 'Broadcasting Alert...' : '🚨 Broadcast Stolen Alert Immediately'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

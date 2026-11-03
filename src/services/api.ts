@@ -200,7 +200,7 @@ class ApiService {
     });
   }
 
-  public async reviewLostReport(id: string, status: 'CONFIRMED' | 'REJECTED', notes: string): Promise<LostReport> {
+  public async reviewLostReport(id: string, status: 'CONFIRMED' | 'REJECTED' | 'UNDER_EXECUTION' | 'FOUND' | 'RESOLVED', notes: string): Promise<LostReport> {
     return this.request<LostReport>(`/lost-reports/${id}/review`, {
       method: 'POST',
       body: JSON.stringify({ status, notes })

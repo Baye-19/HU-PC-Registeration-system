@@ -22,9 +22,31 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onAcknowledgeAlert
 }) => {
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const [seenAlertIds, setSeenAlertIds] = useState<Set<string>>(new Set());
 
   const activeAlerts = alerts.filter(a => a.active);
-  const unreadAlertsCount = activeAlerts.length;
+  // Unread badge count only counts alerts the user hasn't seen yet
+  const unreadAlertsCount = activeAlerts.filter(a => !seenAlertIds.has(a.id)).length;
+
+  const handleToggleAlerts = () => {
+    const nextState = !alertsOpen;
+    setAlertsOpen(nextState);
+    if (nextState) {
+      // Mark all current active alerts as seen so the notification badge count disappears immediately
+      setSeenAlertIds(prev => {
+        const next = new Set(prev);
+        activeAlerts.forEach(a => next.add(a.id));
+        return next;
+      });
+    }
+  };
+
+  const handleAcknowledgeSingle = (id: string) => {
+    setSeenAlertIds(prev => new Set(prev).add(id));
+    if (onAcknowledgeAlert) {
+      onAcknowledgeAlert(id);
+    }
+  };
 
   const tabTitles: Record<string, string> = {
     dashboard: 'Security Overview',
@@ -35,7 +57,6 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
     movements: 'Perimeter Gate Movement Logs',
     'lost-reports': 'Missing & Stolen Device Incidents',
     'audit-logs': 'Immutable Security Audit Trail',
-    architecture: 'Spring Boot & Database Specifications',
     'my-laptops': 'My Registered Laptops',
     'register-laptop': 'Submit Laptop Registration',
     'report-lost': 'Report Missing Device',
@@ -89,7 +110,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
         {/* Real-time Alerts Notification Bell */}
         <div className="relative">
           <button
-            onClick={() => setAlertsOpen(!alertsOpen)}
+            onClick={handleToggleAlerts}
             className="relative p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
             title="Perimeter Security Alerts"
           >
@@ -109,9 +130,23 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
                   <ShieldAlert className="w-4 h-4 text-[#DC2626]" />
                   <span>Real-Time Security Broadcasts</span>
                 </div>
-                <span className="text-[10px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-bold">
-                  {activeAlerts.length} Active
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-bold">
+                    {activeAlerts.length} Active
+                  </span>
+                  {activeAlerts.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setSeenAlertIds(new Set(activeAlerts.map(a => a.id)));
+                        activeAlerts.forEach(a => onAcknowledgeAlert?.(a.id));
+                      }}
+                      className="text-[10px] font-medium text-slate-500 hover:text-slate-800 underline"
+                      title="Clear All Notifications"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
@@ -129,17 +164,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
                         </span>
                       </div>
                       <p className="text-slate-600 text-[11px] leading-snug">{alert.message}</p>
-                      {onAcknowledgeAlert && currentUser.role !== 'STUDENT' && (
-                        <div className="pt-1 flex justify-end">
-                          <button
-                            onClick={() => onAcknowledgeAlert(alert.id)}
-                            className="text-[10px] text-[#0284C7] hover:text-[#0369A1] font-semibold flex items-center gap-1"
-                          >
-                            <Check className="w-3 h-3" />
-                            Acknowledge
-                          </button>
-                        </div>
-                      )}
+                      <div className="pt-1 flex justify-end">
+                        <button
+                          onClick={() => handleAcknowledgeSingle(alert.id)}
+                          className="text-[10px] text-[#0284C7] hover:text-[#0369A1] font-semibold flex items-center gap-1"
+                        >
+                          <Check className="w-3 h-3" />
+                          Acknowledge
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}

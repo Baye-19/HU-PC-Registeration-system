@@ -8,7 +8,6 @@ import {
   ArrowLeftRight,
   AlertTriangle,
   ShieldCheck,
-  FileCode2,
   PlusCircle,
   Camera,
   History,
@@ -52,8 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { id: 'registrations', label: 'Registration Queue', icon: Clock },
           { id: 'movements', label: 'Gate Movements', icon: ArrowLeftRight },
           { id: 'lost-reports', label: 'Security Incidents', icon: AlertTriangle },
-          { id: 'audit-logs', label: 'Audit Trail', icon: ShieldCheck },
-          { id: 'architecture', label: 'Spring Boot Architecture', icon: FileCode2 }
+          { id: 'audit-logs', label: 'Audit Trail', icon: ShieldCheck }
         ];
       case 'OFFICER':
         return [

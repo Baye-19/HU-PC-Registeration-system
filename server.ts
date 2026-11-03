@@ -155,8 +155,19 @@ app.put('/api/v1/students/:id', authenticate, (req: Request, res: Response) => {
 
 // 3. Laptop Registrations
 app.get('/api/v1/registrations', authenticate, (req: Request, res: Response) => {
+  const actor = (req as any).user;
   const status = req.query.status as string;
-  const regs = dbService.getRegistrations(status);
+  let regs = dbService.getRegistrations(status);
+  if (actor && actor.role === 'STUDENT') {
+    regs = regs.filter(
+      r =>
+        r.studentIdNumber === actor.studentId ||
+        r.studentId === actor.studentId ||
+        r.studentId === actor.id ||
+        r.submittedByUserId === actor.id ||
+        r.studentName.toLowerCase() === actor.fullName.toLowerCase()
+    );
+  }
   res.json(regs);
 });
 
@@ -191,19 +202,46 @@ app.post('/api/v1/registrations/:id/reject', authenticate, (req: Request, res: R
   }
 });
 
-// 4. Laptops
+// 4. Laptops (Students strictly restricted to only their own registered PCs)
 app.get('/api/v1/laptops', authenticate, (req: Request, res: Response) => {
-  const laptops = dbService.getLaptops();
+  const actor = (req as any).user;
+  let laptops = dbService.getLaptops();
+  if (actor && actor.role === 'STUDENT') {
+    laptops = laptops.filter(
+      l =>
+        l.studentIdNumber === actor.studentId ||
+        l.studentId === actor.studentId ||
+        l.studentId === actor.id ||
+        l.studentName.toLowerCase() === actor.fullName.toLowerCase()
+    );
+  }
   res.json(laptops);
 });
 
 app.get('/api/v1/laptops/:id', authenticate, (req: Request, res: Response) => {
+  const actor = (req as any).user;
   const laptop = dbService.getLaptopById(req.params.id);
   if (!laptop) return res.status(404).json({ error: 'Laptop not found' });
+  if (actor && actor.role === 'STUDENT') {
+    const isOwner =
+      laptop.studentIdNumber === actor.studentId ||
+      laptop.studentId === actor.studentId ||
+      laptop.studentId === actor.id ||
+      laptop.studentName.toLowerCase() === actor.fullName.toLowerCase();
+    if (!isOwner) {
+      return res.status(403).json({ error: 'Access denied: You can only view your own registered PC' });
+    }
+  }
   res.json(laptop);
 });
 
 app.get('/api/v1/laptops/student/:studentId', authenticate, (req: Request, res: Response) => {
+  const actor = (req as any).user;
+  if (actor && actor.role === 'STUDENT') {
+    if (actor.studentId !== req.params.studentId && actor.id !== req.params.studentId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+  }
   const laptops = dbService.getLaptopsByStudentId(req.params.studentId);
   res.json(laptops);
 });
@@ -241,7 +279,17 @@ app.get('/api/v1/verification/events', authenticate, (req: Request, res: Respons
 
 // 6. Lost Reports
 app.get('/api/v1/lost-reports', authenticate, (req: Request, res: Response) => {
-  const reports = dbService.getLostReports();
+  const actor = (req as any).user;
+  let reports = dbService.getLostReports();
+  if (actor && actor.role === 'STUDENT') {
+    reports = reports.filter(
+      r =>
+        r.studentIdNumber === actor.studentId ||
+        r.reportingStudentId === actor.studentId ||
+        r.reportingStudentId === actor.id ||
+        r.reportingStudentName.toLowerCase() === actor.fullName.toLowerCase()
+    );
+  }
   res.json(reports);
 });
 
