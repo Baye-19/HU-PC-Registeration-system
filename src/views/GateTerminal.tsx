@@ -57,16 +57,6 @@ export const GateTerminal: React.FC<GateTerminalProps> = ({ alerts, onAcknowledg
       {/* Terminal Header & Station Gate Selector */}
       <div className="bg-[#0B2A63] text-white p-3.5 sm:p-4 rounded-xl shadow-md border-b-2 border-[#0284C7]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          {onNavigateBack && (
-            <button
-              onClick={onNavigateBack}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-white bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors shadow-2xs mr-1 shrink-0"
-              title="Return to Dashboard"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-[#F59E0B]" />
-              <span className="hidden xs:inline">Back</span>
-            </button>
-          )}
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white p-0.5 shadow-sm border-2 border-[#F59E0B] flex items-center justify-center shrink-0">
             <img
               src="/assets/aistudio/image_3d6f99fa.png"

@@ -661,16 +661,20 @@ class DatabaseService {
     this.db.users.push(newUser);
 
     if (userData.role === 'STUDENT' && userData.studentId) {
+      const studentPhoto = (userData as any).photoUrl || (userData as any).studentPhotoUrl;
+      const studentNameAmharic = (userData as any).studentNameAmharic;
       const studentRecord: Student = {
         id: `stu-${Date.now()}`,
         userId: id,
         fullName: userData.fullName.trim(),
+        studentNameAmharic: studentNameAmharic?.trim(),
         studentId: userData.studentId.trim(),
         institutionalEmail: userData.email.trim().toLowerCase(),
         department: (userData as any).department?.trim() || 'Software Engineering',
         faculty: (userData as any).faculty?.trim() || 'Institute of Technology (IoT)',
         academicYear: (userData as any).academicYear ? parseInt((userData as any).academicYear) : 1,
         phone: userData.phone,
+        photoUrl: studentPhoto,
         accountStatus: 'ACTIVE',
         createdAt: new Date().toISOString()
       };
@@ -692,6 +696,11 @@ class DatabaseService {
           os: laptopData.os,
           color: laptopData.color,
           physicalDescription: laptopData.physicalDescription,
+          ownerPhone: laptopData.ownerPhone || studentRecord.phone,
+          studentPhotoUrl: laptopData.studentPhotoUrl || studentPhoto,
+          studentNameAmharic: laptopData.studentNameAmharic || studentNameAmharic,
+          department: laptopData.department || studentRecord.department,
+          faculty: laptopData.faculty || studentRecord.faculty,
           submittedByRole: actor.role === 'ADMIN' ? 'OFFICER' : (actor.role || 'OFFICER'),
           submittedByUserId: actor.id,
           autoApprove: true
@@ -762,6 +771,10 @@ class DatabaseService {
     color?: string;
     physicalDescription?: string;
     ownerPhone?: string;
+    studentPhotoUrl?: string;
+    studentNameAmharic?: string;
+    department?: string;
+    faculty?: string;
     submittedByRole: 'STUDENT' | 'OFFICER';
     submittedByUserId: string;
     autoApprove?: boolean;
@@ -779,15 +792,21 @@ class DatabaseService {
     }
 
     const ownerPhone = (data.ownerPhone || student.phone || '')?.trim();
+    const department = (data.department || student.department || 'Computer Science').trim();
+    const faculty = (data.faculty || student.faculty || 'Institute of Technology (IoT)').trim();
+    const studentPhotoUrl = data.studentPhotoUrl || student.photoUrl;
+    const studentNameAmharic = data.studentNameAmharic || student.studentNameAmharic;
 
     const regId = `reg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newReg: LaptopRegistration = {
       id: regId,
       studentId: student.id,
       studentName: student.fullName,
+      studentNameAmharic,
       studentIdNumber: student.studentId,
-      department: student.department,
-      faculty: student.faculty,
+      studentPhotoUrl,
+      department,
+      faculty,
       brand: data.brand.trim(),
       model: data.model.trim(),
       serialNumber: cleanSerial,
@@ -819,9 +838,11 @@ class DatabaseService {
         registrationId: regId,
         studentId: student.id,
         studentName: student.fullName,
+        studentNameAmharic,
         studentIdNumber: student.studentId,
-        department: student.department,
-        faculty: student.faculty,
+        studentPhotoUrl,
+        department,
+        faculty,
         brand: newReg.brand,
         model: newReg.model,
         serialNumber: cleanSerial,
@@ -865,6 +886,7 @@ class DatabaseService {
 
     const pcId = this.getNextPcId();
     const qrToken = this.generateQrToken();
+    const student = this.db.students.find(s => s.id === reg.studentId);
 
     reg.status = 'APPROVED';
     reg.pcId = pcId;
@@ -878,9 +900,11 @@ class DatabaseService {
       registrationId: reg.id,
       studentId: reg.studentId,
       studentName: reg.studentName,
+      studentNameAmharic: reg.studentNameAmharic || student?.studentNameAmharic,
       studentIdNumber: reg.studentIdNumber,
-      department: reg.department,
-      faculty: reg.faculty,
+      studentPhotoUrl: reg.studentPhotoUrl || student?.photoUrl,
+      department: reg.department || student?.department || 'Computer Science',
+      faculty: reg.faculty || student?.faculty || 'Institute of Technology (IoT)',
       brand: reg.brand,
       model: reg.model,
       serialNumber: cleanSerial,
@@ -891,7 +915,7 @@ class DatabaseService {
       os: reg.os,
       color: reg.color,
       physicalDescription: reg.physicalDescription,
-      ownerPhone: reg.ownerPhone,
+      ownerPhone: reg.ownerPhone || student?.phone,
       status: 'APPROVED',
       securityStatus: 'NORMAL',
       qrToken,

@@ -73,16 +73,6 @@ export const MovementsView: React.FC<MovementsViewProps> = ({ onNavigateBack }) 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          {onNavigateBack && (
-            <button
-              onClick={onNavigateBack}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs mr-1 shrink-0"
-              title="Return to Overview"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-[#0B2A63]" />
-              <span className="hidden xs:inline">Back</span>
-            </button>
-          )}
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
               Campus Gate Movements History

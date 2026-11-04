@@ -17,12 +17,14 @@ export interface Student {
   id: string;
   userId: string;
   fullName: string;
+  studentNameAmharic?: string;
   studentId: string; // e.g. "HU/14022/13"
   institutionalEmail: string;
   department: string;
   faculty: string;
   academicYear: number;
   phone?: string;
+  photoUrl?: string;
   accountStatus: 'ACTIVE' | 'SUSPENDED' | 'GRADUATED';
   createdAt: string;
 }
@@ -35,7 +37,9 @@ export interface LaptopRegistration {
   id: string;
   studentId: string;
   studentName: string;
+  studentNameAmharic?: string;
   studentIdNumber: string;
+  studentPhotoUrl?: string;
   department: string;
   faculty: string;
   brand: string;
@@ -66,7 +70,9 @@ export interface Laptop {
   registrationId: string;
   studentId: string;
   studentName: string;
+  studentNameAmharic?: string;
   studentIdNumber: string;
+  studentPhotoUrl?: string;
   department: string;
   faculty: string;
   brand: string;

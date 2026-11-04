@@ -17,7 +17,9 @@ import {
   Cpu,
   HardDrive,
   HardDriveDownload,
-  Info
+  Info,
+  Camera,
+  Upload
 } from 'lucide-react';
 
 interface StudentsManagementViewProps {
@@ -37,12 +39,14 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
   // Add student modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [newFullName, setNewFullName] = useState('');
+  const [newAmharicName, setNewAmharicName] = useState('');
   const [newStudentId, setNewStudentId] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newDepartment, setNewDepartment] = useState('Software Engineering');
+  const [newDepartment, setNewDepartment] = useState('Computer Science');
   const [newFaculty, setNewFaculty] = useState('Institute of Technology (IoT)');
   const [newYear, setNewYear] = useState(3);
   const [newPhone, setNewPhone] = useState('');
+  const [newPhotoUrl, setNewPhotoUrl] = useState<string>('');
 
   // PC Registration fields inside Create Student Modal
   const [registerPcWithStudent, setRegisterPcWithStudent] = useState(true);
@@ -54,7 +58,7 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
   const [pcRam, setPcRam] = useState('16GB DDR4');
   const [pcStorage, setPcStorage] = useState('512GB NVMe SSD');
   const [pcOs, setPcOs] = useState('Windows 11 Pro');
-  const [pcColor, setPcColor] = useState('Silver / Dark Gray');
+  const [pcColor, setPcColor] = useState('Natural Silver');
   const [pcDescription, setPcDescription] = useState('');
 
   const [addLoading, setAddLoading] = useState(false);
@@ -69,9 +73,14 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
   const [quickProcessor, setQuickProcessor] = useState('Intel Core i5');
   const [quickRam, setQuickRam] = useState('16GB');
   const [quickStorage, setQuickStorage] = useState('512GB SSD');
-  const [quickOs, setQuickOs] = useState('Windows 11');
-  const [quickColor, setQuickColor] = useState('Black / Charcoal');
+  const [quickOs, setQuickOs] = useState('Windows 11 Pro');
+  const [quickColor, setQuickColor] = useState('Natural Silver');
   const [quickDescription, setQuickDescription] = useState('');
+  const [quickPhotoUrl, setQuickPhotoUrl] = useState<string>('');
+  const [quickAmharicName, setQuickAmharicName] = useState('');
+  const [quickDepartment, setQuickDepartment] = useState('Computer Science');
+  const [quickFaculty, setQuickFaculty] = useState('Institute of Technology (IoT)');
+  const [quickPhone, setQuickPhone] = useState('');
   const [quickLoading, setQuickLoading] = useState(false);
   const [quickError, setQuickError] = useState<string | null>(null);
 
@@ -112,16 +121,18 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
 
     try {
       const payload: any = {
-        username: `student.${newFullName.toLowerCase().replace(/\s+/g, '.')}`,
+        username: `student.${newFullName.toLowerCase().replace(/[^a-z0-9]/g, '.')}`,
         email: newEmail.trim(),
         password: 'Student@123',
         fullName: newFullName.trim(),
+        studentNameAmharic: newAmharicName.trim(),
         role: 'STUDENT',
         phone: newPhone.trim(),
         studentId: newStudentId.trim(),
         department: newDepartment.trim(),
         faculty: newFaculty.trim(),
-        academicYear: newYear
+        academicYear: newYear,
+        photoUrl: newPhotoUrl
       };
 
       if (registerPcWithStudent && pcSerialNumber.trim() && pcModel.trim()) {
@@ -135,7 +146,12 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
           storage: pcStorage,
           os: pcOs,
           color: pcColor,
-          physicalDescription: pcDescription.trim()
+          physicalDescription: pcDescription.trim(),
+          ownerPhone: newPhone.trim(),
+          studentPhotoUrl: newPhotoUrl,
+          studentNameAmharic: newAmharicName.trim(),
+          department: newDepartment.trim(),
+          faculty: newFaculty.trim()
         };
       }
 
@@ -144,9 +160,11 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
       setShowAddModal(false);
       // Reset form fields
       setNewFullName('');
+      setNewAmharicName('');
       setNewStudentId('');
       setNewEmail('');
       setNewPhone('');
+      setNewPhotoUrl('');
       setPcModel('');
       setPcSerialNumber('');
       setPcDescription('');
@@ -184,6 +202,11 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
         os: quickOs,
         color: quickColor,
         physicalDescription: quickDescription.trim(),
+        ownerPhone: quickPhone.trim() || registerPcStudent.phone,
+        studentPhotoUrl: quickPhotoUrl || (registerPcStudent as any).photoUrl,
+        studentNameAmharic: quickAmharicName.trim() || (registerPcStudent as any).studentNameAmharic,
+        department: quickDepartment.trim() || registerPcStudent.department,
+        faculty: quickFaculty.trim() || registerPcStudent.faculty,
         autoApprove: true
       });
 
@@ -266,16 +289,6 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
       {/* Top Header with Back Button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200 pb-4">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          {onNavigateBack && (
-            <button
-              onClick={onNavigateBack}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-[#0B2A63] bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors shadow-2xs shrink-0"
-              title="Return to Security Overview Dashboard"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 text-[#0B2A63]" />
-              <span className="hidden xs:inline">Back</span>
-            </button>
-          )}
           <div className="min-w-0">
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2 truncate">
               <Users className="w-5 h-5 text-[#0B2A63] shrink-0" />
@@ -598,20 +611,93 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
             <form onSubmit={handleCreateStudent} className="space-y-4 text-xs">
               {/* Section 1: Student Information */}
               <div className="space-y-3">
-                <h4 className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                  1. Student Identity Information
+                <h4 className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-[#0B2A63]" />
+                  <span>1. Student Identity Information</span>
                 </h4>
 
+                {/* Student Photo Upload with Live Preview */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Dawit Haile"
-                    value={newFullName}
-                    onChange={e => setNewFullName(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#0B2A63]"
-                  />
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Student ID Portrait Photo (ፎቶ)
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                    <div className="w-16 h-20 rounded-md border border-slate-300 bg-white overflow-hidden shrink-0 flex items-center justify-center shadow-2xs relative">
+                      {newPhotoUrl ? (
+                        <img src={newPhotoUrl} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-center p-1 text-slate-400">
+                          <Camera className="w-5 h-5 mx-auto text-slate-400" />
+                          <span className="text-[9px] block leading-tight mt-0.5">Passport Photo</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-1.5 text-xs">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = ev => {
+                              if (typeof ev.target?.result === 'string') {
+                                setNewPhotoUrl(ev.target.result);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-[#0B2A63] hover:file:bg-blue-100 cursor-pointer"
+                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500">Or use:</span>
+                        <button
+                          type="button"
+                          onClick={() => setNewPhotoUrl('/assets/aistudio/student_id_photo.png')}
+                          className="text-[10px] text-blue-600 hover:underline font-semibold"
+                        >
+                          Sample Student Portrait
+                        </button>
+                        {newPhotoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setNewPhotoUrl('')}
+                            className="text-[10px] text-red-500 hover:underline font-medium ml-1"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[9px] text-slate-400">
+                        This photograph will be printed on the official Hawassa University ID pass card.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Full Name (English) *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Dawit Haile"
+                      value={newFullName}
+                      onChange={e => setNewFullName(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#0B2A63]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">የተማሪው ስም (Amharic Name)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. ዳዊት ኃይሌ"
+                      value={newAmharicName}
+                      onChange={e => setNewAmharicName(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#0B2A63]"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
@@ -654,35 +740,52 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Department</label>
-                    <input
-                      type="text"
+                    <label className="block font-semibold text-slate-700 mb-1">Department *</label>
+                    <select
                       value={newDepartment}
                       onChange={e => setNewDepartment(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#0B2A63]"
-                    />
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 bg-white"
+                    >
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Software Engineering">Software Engineering</option>
+                      <option value="Information Systems">Information Systems</option>
+                      <option value="Electrical & Computer Engineering">Electrical & Computer Engineering</option>
+                      <option value="Civil Engineering">Civil Engineering</option>
+                      <option value="Mechanical Engineering">Mechanical Engineering</option>
+                      <option value="Biomedical Science">Biomedical Science</option>
+                      <option value="Medicine & Health Sciences">Medicine & Health Sciences</option>
+                    </select>
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Faculty / College</label>
-                    <input
-                      type="text"
+                    <label className="block font-semibold text-slate-700 mb-1">Faculty / College *</label>
+                    <select
                       value={newFaculty}
                       onChange={e => setNewFaculty(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#0B2A63]"
-                    />
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 bg-white"
+                    >
+                      <option value="Institute of Technology (IoT)">Institute of Technology (IoT)</option>
+                      <option value="College of Natural & Computational Sciences">College of Natural & Computational Sciences</option>
+                      <option value="College of Medicine & Health Sciences">College of Medicine & Health Sciences</option>
+                      <option value="College of Business & Economics">College of Business & Economics</option>
+                      <option value="College of Agriculture">College of Agriculture</option>
+                    </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Phone Number</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone Number of PC Owner (ስልክ) *</label>
                   <input
-                    type="text"
+                    type="tel"
+                    required
                     placeholder="+251 9X XXX XXXX"
                     value={newPhone}
                     onChange={e => setNewPhone(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-[#0B2A63]"
                   />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    Required mobile phone number printed on ID clearance pass.
+                  </span>
                 </div>
               </div>
 
@@ -910,7 +1013,108 @@ export const StudentsManagementView: React.FC<StudentsManagementViewProps> = ({ 
             )}
 
             <form onSubmit={handleQuickRegisterPc} className="space-y-3.5 text-xs">
+              {/* Student Photo Upload & Details Confirmation */}
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Student ID Portrait Photo (ፎቶ)
+                </label>
+                <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                  <div className="w-14 h-18 rounded-md border border-slate-300 bg-white overflow-hidden shrink-0 flex items-center justify-center shadow-2xs relative">
+                    {quickPhotoUrl ? (
+                      <img src={quickPhotoUrl} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-center p-1 text-slate-400">
+                        <Camera className="w-4 h-4 mx-auto text-slate-400" />
+                        <span className="text-[8px] block leading-tight mt-0.5">Photo</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-1 text-xs">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = ev => {
+                            if (typeof ev.target?.result === 'string') {
+                              setQuickPhotoUrl(ev.target.result);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-[#0B2A63] hover:file:bg-blue-100 cursor-pointer"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setQuickPhotoUrl('/assets/aistudio/student_id_photo.png')}
+                        className="text-[10px] text-blue-600 hover:underline font-semibold"
+                      >
+                        Sample Student Photo
+                      </button>
+                      {quickPhotoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setQuickPhotoUrl('')}
+                          className="text-[10px] text-red-500 hover:underline font-medium ml-1"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Phone Number of PC Owner (ስልክ) *</label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="+251 9X XXX XXXX"
+                    value={quickPhone}
+                    onChange={e => setQuickPhone(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">የተማሪው ስም (Amharic Name)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ዳዊት ኃይሌ"
+                    value={quickAmharicName}
+                    onChange={e => setQuickAmharicName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Department</label>
+                  <input
+                    type="text"
+                    value={quickDepartment}
+                    onChange={e => setQuickDepartment(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Faculty / College</label>
+                  <input
+                    type="text"
+                    value={quickFaculty}
+                    onChange={e => setQuickFaculty(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-800 bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 border-t border-slate-200">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">PC Brand *</label>
                   <select

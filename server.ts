@@ -1,5 +1,7 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dbService } from './server/db';
@@ -9,47 +11,83 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'c2VjdXJlX2hhd2Fzc2FfdW5pdmVyc2l0eV9jYW1wdXNndWFyZF9qd3Rfc2VjcmV0X2tleV8yMDI2';
 
 app.use(express.json());
 
-// Simple token cache for authenticated sessions
-const sessionTokens = new Map<string, any>();
-
+// Secure signed token generation & verification (HMAC-SHA256 with 24-hr expiry)
 function createToken(user: any): string {
-  const token = `cg_jwt_${Buffer.from(JSON.stringify({ id: user.id, role: user.role, t: Date.now() })).toString('base64')}`;
-  sessionTokens.set(token, user);
-  return token;
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    fullName: user.fullName,
+    exp: Date.now() + 86400000 // 24 hours
+  })).toString('base64url');
+
+  const signature = crypto.createHmac('sha256', JWT_SECRET)
+    .update(`${header}.${payload}`)
+    .digest('base64url');
+
+  return `${header}.${payload}.${signature}`;
 }
 
-// Authentication Middleware
+function verifyToken(token: string): any | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const [header, payload, signature] = parts;
+    const expectedSig = crypto.createHmac('sha256', JWT_SECRET)
+      .update(`${header}.${payload}`)
+      .digest('base64url');
+
+    if (signature !== expectedSig) return null;
+
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf-8'));
+    if (decoded.exp && Date.now() > decoded.exp) {
+      return null; // Expired token
+    }
+
+    const user = dbService.getUserById(decoded.id);
+    return user || null;
+  } catch {
+    return null;
+  }
+}
+
+// Authentication Middleware - strictly blocks unauthorized requests (no admin fallback)
 function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    // Default to admin user for convenience if in dev mode without token
-    const defaultUser = dbService.getUserById('usr-admin-1');
-    (req as any).user = defaultUser;
-    return next();
+    return res.status(401).json({ error: 'Authentication required: missing or invalid authorization header' });
   }
+
   const token = authHeader.substring(7);
-  const user = sessionTokens.get(token);
+  const user = verifyToken(token);
   if (!user) {
-    // Attempt parse if created by standard format
-    try {
-      const payload = JSON.parse(Buffer.from(token.replace('cg_jwt_', ''), 'base64').toString('utf-8'));
-      const found = dbService.getUserById(payload.id);
-      if (found) {
-        (req as any).user = found;
-        return next();
-      }
-    } catch {
-      // Fallback
-    }
-    const defaultUser = dbService.getUserById('usr-admin-1');
-    (req as any).user = defaultUser;
-    return next();
+    return res.status(401).json({ error: 'Invalid or expired institutional token. Please log in again.' });
   }
+
   (req as any).user = user;
   next();
+}
+
+// Role-Based Authorization Guard
+function requireRole(...allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    if (!user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).json({
+        error: `Access Denied: Role '${user.role}' lacks permission for this endpoint. Required: [${allowedRoles.join(', ')}]`
+      });
+    }
+    next();
+  };
 }
 
 // --- API ROUTES ---
@@ -114,7 +152,7 @@ app.get('/api/v1/auth/me', authenticate, (req: Request, res: Response) => {
   res.json({ user });
 });
 
-// Switch role route for rapid system testing in sandbox
+// Role switch for role testing
 app.post('/api/v1/auth/switch-account', (req: Request, res: Response) => {
   const { role } = req.body;
   const users = dbService.getUsers();
@@ -122,11 +160,11 @@ app.post('/api/v1/auth/switch-account', (req: Request, res: Response) => {
   const token = createToken(target);
   dbService.logAudit(
     target,
-    'ROLE_SWITCH_DEBUG',
+    'ROLE_SWITCH_TEST',
     'User',
     target.id,
     'SUCCESS',
-    `Session switched to ${target.role} (${target.fullName})`
+    `Role perspective switched to ${target.role} (${target.fullName})`
   );
   res.json({ token, user: target });
 });
@@ -181,7 +219,7 @@ app.post('/api/v1/registrations', authenticate, (req: Request, res: Response) =>
   }
 });
 
-app.post('/api/v1/registrations/:id/approve', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/registrations/:id/approve', authenticate, requireRole('OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const result = dbService.approveRegistration(req.params.id, actor);
@@ -191,10 +229,13 @@ app.post('/api/v1/registrations/:id/approve', authenticate, (req: Request, res: 
   }
 });
 
-app.post('/api/v1/registrations/:id/reject', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/registrations/:id/reject', authenticate, requireRole('OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const { reason } = req.body;
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ error: 'Rejection reason is strictly mandatory' });
+    }
     const reg = dbService.rejectRegistration(req.params.id, reason, actor);
     res.json(reg);
   } catch (err: any) {
@@ -239,7 +280,7 @@ app.get('/api/v1/laptops/student/:studentId', authenticate, (req: Request, res: 
   const actor = (req as any).user;
   if (actor && actor.role === 'STUDENT') {
     if (actor.studentId !== req.params.studentId && actor.id !== req.params.studentId) {
-      return res.status(403).json({ error: 'Access denied' });
+      return res.status(403).json({ error: 'Access denied: You can only query your own laptops' });
     }
   }
   const laptops = dbService.getLaptopsByStudentId(req.params.studentId);
@@ -257,12 +298,12 @@ app.post('/api/v1/laptops/:id/reissue-qr', authenticate, (req: Request, res: Res
 });
 
 // 5. Verification & Gate Movements
-app.post('/api/v1/verification/verify', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/verification/verify', authenticate, requireRole('GATE_OFFICER', 'OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   const result = dbService.verifyDevice(req.body);
   res.json(result);
 });
 
-app.post('/api/v1/verification/movement', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/verification/movement', authenticate, requireRole('GATE_OFFICER', 'OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const event = dbService.recordMovement(req.body, actor);
@@ -303,7 +344,7 @@ app.post('/api/v1/lost-reports', authenticate, (req: Request, res: Response) => 
   }
 });
 
-app.post('/api/v1/lost-reports/:id/review', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/lost-reports/:id/review', authenticate, requireRole('OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const { status, notes } = req.body;
@@ -314,7 +355,7 @@ app.post('/api/v1/lost-reports/:id/review', authenticate, (req: Request, res: Re
   }
 });
 
-app.post('/api/v1/lost-reports/:id/resolve', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/lost-reports/:id/resolve', authenticate, requireRole('OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const { notes } = req.body;
@@ -331,7 +372,7 @@ app.get('/api/v1/alerts', authenticate, (req: Request, res: Response) => {
   res.json(alerts);
 });
 
-app.post('/api/v1/alerts', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/alerts', authenticate, requireRole('OFFICER', 'ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const alert = dbService.createSecurityAlert(req.body, actor);
@@ -358,7 +399,6 @@ app.get('/api/v1/alerts/stream', (req: Request, res: Response) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  // Send initial connected ping
   res.write(`data: ${JSON.stringify({ type: 'CONNECTED', timestamp: new Date().toISOString() })}\n\n`);
 
   const unregister = dbService.registerSseClient((alert) => {
@@ -370,12 +410,12 @@ app.get('/api/v1/alerts/stream', (req: Request, res: Response) => {
   });
 });
 
-// 8. Gates & Audits & Stats
+// 8. Gates & Audits & Stats (Strictly Protected by Role)
 app.get('/api/v1/gates', authenticate, (req: Request, res: Response) => {
   res.json(dbService.getGates());
 });
 
-app.get('/api/v1/audit-logs', authenticate, (req: Request, res: Response) => {
+app.get('/api/v1/audit-logs', authenticate, requireRole('ADMIN'), (req: Request, res: Response) => {
   res.json(dbService.getAuditLogs());
 });
 
@@ -383,11 +423,11 @@ app.get('/api/v1/dashboard/stats', authenticate, (req: Request, res: Response) =
   res.json(dbService.getDashboardStats());
 });
 
-app.get('/api/v1/users', authenticate, (req: Request, res: Response) => {
+app.get('/api/v1/users', authenticate, requireRole('ADMIN'), (req: Request, res: Response) => {
   res.json(dbService.getUsers());
 });
 
-app.post('/api/v1/users', authenticate, (req: Request, res: Response) => {
+app.post('/api/v1/users', authenticate, requireRole('ADMIN'), (req: Request, res: Response) => {
   try {
     const actor = (req as any).user;
     const user = dbService.createUser(req.body, actor);
