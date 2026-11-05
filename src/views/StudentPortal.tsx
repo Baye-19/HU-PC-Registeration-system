@@ -65,11 +65,23 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser, onNav
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [allLaptops, allRegs, allLost] = await Promise.all([
+      const [allLaptops, allRegs, allLost, allStudents] = await Promise.all([
         api.getLaptops(),
         api.getRegistrations(),
-        api.getLostReports()
+        api.getLostReports(),
+        api.getStudents().catch(() => [])
       ]);
+
+      // Match student profile to populate department & faculty
+      const matched = allStudents.find(
+        (s: any) => s.studentId === currentUser.studentId || s.userId === currentUser.id
+      );
+      if (matched) {
+        if (matched.department) setStudentDepartment(matched.department);
+        if (matched.faculty) setStudentFaculty(matched.faculty);
+        if (matched.studentNameAmharic) setStudentNameAmharic(matched.studentNameAmharic);
+        if (matched.phone) setOwnerPhone(matched.phone);
+      }
 
       // Filter by current student
       const studentLaptops = allLaptops.filter(
@@ -86,7 +98,10 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser, onNav
       setRegistrations(studentRegs);
       setLostReports(studentLost);
 
-      if (studentLaptops.length > 0 && !selectedLaptopToReport) {
+      // If student has no registered PC and no pending registrations, open REGISTER tab directly
+      if (studentLaptops.length === 0 && studentRegs.length === 0) {
+        setActiveTab('REGISTER');
+      } else if (studentLaptops.length > 0 && !selectedLaptopToReport) {
         setSelectedLaptopToReport(studentLaptops[0].id);
       }
     } catch (err) {
@@ -423,6 +438,15 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({ currentUser, onNav
               Enter your device hardware specifications. Hawassa University Police Union security officers will verify the details and issue an authorized clearance pass.
             </p>
           </div>
+
+          {laptops.length === 0 && (
+            <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
+              <PlusCircle className="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold">Welcome, {currentUser.fullName}!</span> No personal laptop is currently registered under your name. Complete and submit the form below to register your device with the Hawassa University Campus Police Union.
+              </div>
+            </div>
+          )}
 
           {regSuccessMsg && (
             <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-xs text-emerald-800 font-medium flex items-center gap-2">

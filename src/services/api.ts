@@ -76,6 +76,48 @@ class ApiService {
     return data;
   }
 
+  public async loginByStudentId(studentId: string): Promise<{
+    token: string;
+    user: User;
+    student?: Student;
+    hasRegisteredPc?: boolean;
+  }> {
+    return this.unifiedLogin(studentId);
+  }
+
+  public async unifiedLogin(credential: string): Promise<{
+    token: string;
+    user: User;
+    student?: Student;
+    hasRegisteredPc?: boolean;
+    role?: Role;
+  }> {
+    const data = await this.request<{
+      token: string;
+      user: User;
+      student?: Student;
+      hasRegisteredPc?: boolean;
+      role?: Role;
+    }>('/auth/unified-login', {
+      method: 'POST',
+      body: JSON.stringify({ credential, studentId: credential })
+    });
+    this.setToken(data.token);
+    return data;
+  }
+
+  public async getSampleStudents(): Promise<Array<{
+    id: string;
+    fullName: string;
+    studentNameAmharic?: string;
+    studentId: string;
+    department: string;
+    faculty: string;
+    hasPc: boolean;
+  }>> {
+    return this.request('/auth/sample-students');
+  }
+
   public async getMe(): Promise<{ user: User }> {
     return this.request<{ user: User }>('/auth/me');
   }

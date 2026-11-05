@@ -106,86 +106,99 @@ class DatabaseService {
         active: true,
         createdAt: '2026-01-15T10:00:00.000Z',
         passwordHash: bcrypt.hashSync('Gate@123', salt)
-      },
-      {
-        id: 'usr-student-1',
-        username: 'student.abebe',
-        email: 'abebe.bikila@hu.edu.et',
-        fullName: 'Abebe Bikila',
-        role: 'STUDENT',
-        phone: '+251 92 456 7890',
-        studentId: 'HU/14022/13',
-        active: true,
-        createdAt: '2026-02-01T11:00:00.000Z',
-        passwordHash: bcrypt.hashSync('Student@123', salt)
-      },
-      {
-        id: 'usr-student-2',
-        username: 'student.selam',
-        email: 'selam.alemu@hu.edu.et',
-        fullName: 'Selamawit Alemu',
-        role: 'STUDENT',
-        phone: '+251 92 567 8901',
-        studentId: 'HU/15881/14',
-        active: true,
-        createdAt: '2026-02-05T14:20:00.000Z',
-        passwordHash: bcrypt.hashSync('Student@123', salt)
-      },
-      {
-        id: 'usr-student-3',
-        username: 'student.dawit',
-        email: 'dawit.haile@hu.edu.et',
-        fullName: 'Dawit Haile',
-        role: 'STUDENT',
-        phone: '+251 92 678 9012',
-        studentId: 'HU/16109/15',
-        active: true,
-        createdAt: '2026-02-10T16:00:00.000Z',
-        passwordHash: bcrypt.hashSync('Student@123', salt)
       }
     ];
 
-    const students: Student[] = [
-      {
-        id: 'stu-1',
-        userId: 'usr-student-1',
-        fullName: 'Abebe Bikila',
-        studentId: 'HU/14022/13',
-        institutionalEmail: 'abebe.bikila@hu.edu.et',
-        department: 'Software Engineering',
-        faculty: 'Institute of Technology (IoT)',
-        academicYear: 4,
-        phone: '+251 92 456 7890',
+    const rawInitialStudents = [
+      { num: 1, name: 'Abebe Bikila', amharic: 'አበበ ቢቂላ', studentId: 'HU/14022/13', department: 'Software Engineering', faculty: 'Institute of Technology (IoT)', year: 4, phone: '+251 92 456 7890' },
+      { num: 2, name: 'Selamawit Alemu', amharic: 'ሰላማዊት አለሙ', studentId: 'HU/15881/14', department: 'Computer Science', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 92 567 8901' },
+      { num: 3, name: 'Dawit Haile', amharic: 'ዳዊት ኃይሌ', studentId: 'HU/16109/15', department: 'Electrical & Computer Engineering', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 92 678 9012' },
+      { num: 4, name: 'Almaz Ayana', amharic: 'አልማዝ አያና', studentId: 'HU/16234/15', department: 'Accounting & Finance', faculty: 'College of Business and Economics', year: 3, phone: '+251 92 789 0123' },
+      { num: 5, name: 'Kenenisa Bekele', amharic: 'ቀነኒሳ በቀለ', studentId: 'HU/16540/15', department: 'Mechanical Engineering', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 92 890 1234' },
+      { num: 6, name: 'Derartu Tulu', amharic: 'ደራርቱ ቱሉ', studentId: 'HU/16712/15', department: 'Medicine (MD)', faculty: 'College of Medicine and Health Sciences', year: 4, phone: '+251 92 901 2345' },
+      { num: 7, name: 'Haile Gebrselassie', amharic: 'ኃይሌ ገብረሥላሴ', studentId: 'HU/17001/16', department: 'Civil Engineering', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 93 112 2334' },
+      { num: 8, name: 'Tigist Assefa', amharic: 'ትዕግሥት አሰፋ', studentId: 'HU/17015/16', department: 'Pharmacy', faculty: 'College of Medicine and Health Sciences', year: 3, phone: '+251 93 223 3445' },
+      { num: 9, name: 'Tamirat Tola', amharic: 'ታምራት ቶላ', studentId: 'HU/17042/16', department: 'Information Technology', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 93 334 4556' },
+      { num: 10, name: 'Genzebe Dibaba', amharic: 'ገንዘቤ ዲባባ', studentId: 'HU/17088/16', department: 'Economics', faculty: 'College of Business and Economics', year: 2, phone: '+251 93 445 5667' },
+      { num: 11, name: 'Yohannes Mengistu', amharic: 'ዮሐንስ መንግሥቱ', studentId: 'HU/17110/16', department: 'Computer Science', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 93 556 6778' },
+      { num: 12, name: 'Bethelhem Tadesse', amharic: 'ቤተልሔም ታደሰ', studentId: 'HU/17145/16', department: 'Architecture', faculty: 'Institute of Technology (IoT)', year: 4, phone: '+251 93 667 7889' },
+      { num: 13, name: 'Samuel Girma', amharic: 'ሳሙኤል ግርማ', studentId: 'HU/17180/16', department: 'Software Engineering', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 93 778 8990' },
+      { num: 14, name: 'Meron Worku', amharic: 'ሜሮን ወርቁ', studentId: 'HU/17215/16', department: 'Comprehensive Nursing', faculty: 'College of Medicine and Health Sciences', year: 3, phone: '+251 93 889 9001' },
+      { num: 15, name: 'Eyob Kassahun', amharic: 'ኢዮብ ካሣሁን', studentId: 'HU/17240/16', department: 'Law (LL.B)', faculty: 'College of Law and Governance', year: 3, phone: '+251 93 990 0112' },
+      { num: 16, name: 'Tsion Fikru', amharic: 'ጽዮን ፍቅሩ', studentId: 'HU/17277/16', department: 'Management', faculty: 'College of Business and Economics', year: 2, phone: '+251 94 111 2233' },
+      { num: 17, name: 'Natnael Getachew', amharic: 'ናትናኤል ጌታቸው', studentId: 'HU/17305/16', department: 'Chemical Engineering', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 94 222 3344' },
+      { num: 18, name: 'Rahel Kebede', amharic: 'ራሔል ከበደ', studentId: 'HU/17332/16', department: 'Public Health', faculty: 'College of Medicine and Health Sciences', year: 3, phone: '+251 94 333 4455' },
+      { num: 19, name: 'Henok Tefera', amharic: 'ሄኖክ ተፈራ', studentId: 'HU/17360/16', department: 'Plant Science', faculty: 'College of Agriculture', year: 2, phone: '+251 94 444 5566' },
+      { num: 20, name: 'Mahlet Assefa', amharic: 'ማህሌት አሰፋ', studentId: 'HU/17395/16', department: 'Medical Laboratory Science', faculty: 'College of Medicine and Health Sciences', year: 3, phone: '+251 94 555 6677' },
+      { num: 21, name: 'Yared Belay', amharic: 'ያሬድ በላይ', studentId: 'HU/17420/16', department: 'Mathematics', faculty: 'College of Natural and Computational Sciences', year: 2, phone: '+251 94 666 7788' },
+      { num: 22, name: 'Kalkidan Demisse', amharic: 'ቃልኪዳን ደሚሴ', studentId: 'HU/17455/16', department: 'Biotechnology', faculty: 'College of Natural and Computational Sciences', year: 3, phone: '+251 94 777 8899' },
+      { num: 23, name: 'Fitsum Abera', amharic: 'ፍጹም አበራ', studentId: 'HU/17482/16', department: 'Statistics', faculty: 'College of Natural and Computational Sciences', year: 2, phone: '+251 94 888 9900' },
+      { num: 24, name: 'Kidist Hailu', amharic: 'ቅድስት ኃይሉ', studentId: 'HU/17510/16', department: 'Journalism & Communication', faculty: 'College of Social Sciences and Humanities', year: 2, phone: '+251 94 999 0011' },
+      { num: 25, name: 'Abel Negash', amharic: 'አቤል ነጋሽ', studentId: 'HU/17544/16', department: 'Electrical & Computer Engineering', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 95 111 1222' },
+      { num: 26, name: 'Senait Mulugeta', amharic: 'ሰናይት ሙሉጌታ', studentId: 'HU/17578/16', department: 'Food Science & Technology', faculty: 'College of Agriculture', year: 3, phone: '+251 95 222 2333' },
+      { num: 27, name: 'Kirubel Desta', amharic: 'ኪሩቤል ደስታ', studentId: 'HU/17602/16', department: 'Computer Science', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 95 333 3444' },
+      { num: 28, name: 'Bilen Sisay', amharic: 'ቢለን ሲሳይ', studentId: 'HU/17639/16', department: 'Marketing Management', faculty: 'College of Business and Economics', year: 2, phone: '+251 95 444 4555' },
+      { num: 29, name: 'Solomon Berhanu', amharic: 'ሰለሞን ብርሃኑ', studentId: 'HU/17670/16', department: 'Physics', faculty: 'College of Natural and Computational Sciences', year: 3, phone: '+251 95 555 5666' },
+      { num: 30, name: 'Martha Getnet', amharic: 'ማርታ ጌትነት', studentId: 'HU/17705/16', department: 'Medicine (MD)', faculty: 'College of Medicine and Health Sciences', year: 2, phone: '+251 95 666 6777' },
+      { num: 31, name: 'Daniel Bogale', amharic: 'ዳንኤል ቦጋለ', studentId: 'HU/17733/16', department: 'Civil Engineering', faculty: 'Institute of Technology (IoT)', year: 4, phone: '+251 95 777 7888' },
+      { num: 32, name: 'Eden Teshome', amharic: 'ኤደን ተሾመ', studentId: 'HU/17768/16', department: 'Sociology', faculty: 'College of Social Sciences and Humanities', year: 2, phone: '+251 95 888 8999' },
+      { num: 33, name: 'Surafel Ayele', amharic: 'ሱራፌል አየለ', studentId: 'HU/17801/16', department: 'Software Engineering', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 95 999 9000' },
+      { num: 34, name: 'Feven Chernet', amharic: 'ፈቨን ቸርነት', studentId: 'HU/17835/16', department: 'Agricultural Economics', faculty: 'College of Agriculture', year: 2, phone: '+251 96 111 2345' },
+      { num: 35, name: 'Nahom Sintayehu', amharic: 'ናሆም ስንታየሁ', studentId: 'HU/17870/16', department: 'Chemistry', faculty: 'College of Natural and Computational Sciences', year: 3, phone: '+251 96 222 3456' },
+      { num: 36, name: 'Rediet Berhe', amharic: 'ረዲኤት በርሄ', studentId: 'HU/17904/16', department: 'Psychology', faculty: 'College of Social Sciences and Humanities', year: 2, phone: '+251 96 333 4567' },
+      { num: 37, name: 'Ermias Zeleke', amharic: 'ኤርሚያስ ዘለቀ', studentId: 'HU/17938/16', department: 'Mechanical Engineering', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 96 444 5678' },
+      { num: 38, name: 'Liya Wolde', amharic: 'ሊያ ወልዴ', studentId: 'HU/17972/16', department: 'Horticulture', faculty: 'College of Agriculture', year: 3, phone: '+251 96 555 6789' },
+      { num: 39, name: 'Robel Kassa', amharic: 'ሮቤል ካሳ', studentId: 'HU/18005/17', department: 'Information Technology', faculty: 'Institute of Technology (IoT)', year: 1, phone: '+251 96 666 7890' },
+      { num: 40, name: 'Hana Mekonnen', amharic: 'ሃና መኮንን', studentId: 'HU/18040/17', department: 'Banking & Insurance', faculty: 'College of Business and Economics', year: 2, phone: '+251 96 777 8901' },
+      { num: 41, name: 'Tomas Hailemariam', amharic: 'ቶማስ ኃይለማርያም', studentId: 'HU/18076/17', department: 'Biology', faculty: 'College of Natural and Computational Sciences', year: 2, phone: '+251 96 888 9012' },
+      { num: 42, name: 'Hiwot Gashaw', amharic: 'ህይወት ጋሻው', studentId: 'HU/18112/17', department: 'Water Resources Engineering', faculty: 'Institute of Technology (IoT)', year: 3, phone: '+251 96 999 0123' },
+      { num: 43, name: 'Brook Mesfin', amharic: 'ብሩክ መስፍን', studentId: 'HU/18149/17', department: 'Architecture', faculty: 'Institute of Technology (IoT)', year: 1, phone: '+251 97 111 3456' },
+      { num: 44, name: 'Helen Gebre', amharic: 'ሄለን ገብሬ', studentId: 'HU/18185/17', department: 'Governance & Development Studies', faculty: 'College of Law and Governance', year: 2, phone: '+251 97 222 4567' },
+      { num: 45, name: 'Ephrem Fenta', amharic: 'ኤፍሬም ፈንታ', studentId: 'HU/18220/17', department: 'Animal Science', faculty: 'College of Agriculture', year: 2, phone: '+251 97 333 5678' },
+      { num: 46, name: 'Sara Million', amharic: 'ሳራ ሚሊዮን', studentId: 'HU/18256/17', department: 'English Language & Literature', faculty: 'College of Social Sciences and Humanities', year: 1, phone: '+251 97 444 6789' },
+      { num: 47, name: 'Elias Regassa', amharic: 'ኤልያስ ረጋሳ', studentId: 'HU/18292/17', department: 'Computer Science', faculty: 'Institute of Technology (IoT)', year: 2, phone: '+251 97 555 7890' },
+      { num: 48, name: 'Blen Tsegaye', amharic: 'ብሌን ፀጋዬ', studentId: 'HU/18328/17', department: 'Midwifery', faculty: 'College of Medicine and Health Sciences', year: 3, phone: '+251 97 666 8901' },
+      { num: 49, name: 'Mikiyas Alemayehu', amharic: 'ሚኪያስ አለማየሁ', studentId: 'HU/18365/17', department: 'Software Engineering', faculty: 'Institute of Technology (IoT)', year: 1, phone: '+251 97 777 9012' },
+      { num: 50, name: 'Bethlehem Girma', amharic: 'ቤተልሔም ግርማ', studentId: 'HU/18400/17', department: 'Environmental Science', faculty: 'College of Natural and Computational Sciences', year: 2, phone: '+251 97 888 0123' }
+    ];
+
+    const students: Student[] = [];
+    const studentPasswordHash = bcrypt.hashSync('Student@123', salt);
+
+    rawInitialStudents.forEach(s => {
+      const stuId = `stu-${s.num}`;
+      const userId = `usr-student-${s.num}`;
+      const email = `${s.name.toLowerCase().replace(/[^a-z]/g, '.')}@hu.edu.et`;
+      const username = `student.${s.name.split(' ')[0].toLowerCase()}${s.num > 1 ? s.num : ''}`;
+
+      users.push({
+        id: userId,
+        username,
+        email,
+        fullName: s.name,
+        role: 'STUDENT',
+        phone: s.phone,
+        studentId: s.studentId,
+        active: true,
+        createdAt: '2026-02-01T11:00:00.000Z',
+        passwordHash: studentPasswordHash
+      });
+
+      students.push({
+        id: stuId,
+        userId,
+        fullName: s.name,
+        studentNameAmharic: s.amharic,
+        studentId: s.studentId,
+        institutionalEmail: email,
+        department: s.department,
+        faculty: s.faculty,
+        academicYear: s.year,
+        phone: s.phone,
         accountStatus: 'ACTIVE',
         createdAt: '2026-02-01T11:00:00.000Z'
-      },
-      {
-        id: 'stu-2',
-        userId: 'usr-student-2',
-        fullName: 'Selamawit Alemu',
-        studentId: 'HU/15881/14',
-        institutionalEmail: 'selam.alemu@hu.edu.et',
-        department: 'Computer Science',
-        faculty: 'Institute of Technology (IoT)',
-        academicYear: 3,
-        phone: '+251 92 567 8901',
-        accountStatus: 'ACTIVE',
-        createdAt: '2026-02-05T14:20:00.000Z'
-      },
-      {
-        id: 'stu-3',
-        userId: 'usr-student-3',
-        fullName: 'Dawit Haile',
-        studentId: 'HU/16109/15',
-        institutionalEmail: 'dawit.haile@hu.edu.et',
-        department: 'Electrical & Computer Engineering',
-        faculty: 'Institute of Technology (IoT)',
-        academicYear: 2,
-        phone: '+251 92 678 9012',
-        accountStatus: 'ACTIVE',
-        createdAt: '2026-02-10T16:00:00.000Z'
-      }
-    ];
+      });
+    });
 
     const gates: Gate[] = [
       {
@@ -613,6 +626,19 @@ class DatabaseService {
     return this.db.users.map(({ passwordHash, ...rest }) => rest);
   }
 
+  public verifyStaffPassword(password: string): User | null {
+    const raw = password.trim();
+    if (!raw) return null;
+    const staff = this.db.users.filter(u => u.role !== 'STUDENT');
+    for (const u of staff) {
+      if (u.passwordHash && bcrypt.compareSync(raw, u.passwordHash)) {
+        const { passwordHash, ...user } = u;
+        return user;
+      }
+    }
+    return null;
+  }
+
   public getUserById(id: string) {
     const u = this.db.users.find(u => u.id === id);
     if (!u) return null;
@@ -622,9 +648,16 @@ class DatabaseService {
 
   public getUserByUsernameOrEmail(identifier: string) {
     const norm = identifier.trim().toLowerCase();
-    return this.db.users.find(
-      u => u.username.toLowerCase() === norm || u.email.toLowerCase() === norm
-    );
+    const normClean = norm.replace(/[^a-z0-9]/g, '');
+    return this.db.users.find(u => {
+      const uName = u.username.toLowerCase();
+      const uEmail = u.email.toLowerCase();
+      const uSid = (u.studentId || '').toLowerCase();
+      const uSidClean = uSid.replace(/[^a-z0-9]/g, '');
+      return uName === norm ||
+             uEmail === norm ||
+             (uSid && (uSid === norm || (normClean.length >= 4 && uSidClean === normClean)));
+    });
   }
 
   public createUser(userData: {
@@ -729,7 +762,31 @@ class DatabaseService {
   }
 
   public getStudentByStudentId(studentId: string) {
-    return this.db.students.find(s => s.studentId.toLowerCase() === studentId.trim().toLowerCase());
+    const clean = studentId.trim().toLowerCase();
+    const cleanAlpha = clean.replace(/[^a-z0-9]/g, '');
+    return this.db.students.find(s => {
+      const sid = s.studentId.toLowerCase();
+      const sidAlpha = sid.replace(/[^a-z0-9]/g, '');
+      return sid === clean ||
+             sidAlpha === cleanAlpha ||
+             (cleanAlpha.length >= 4 && (sidAlpha.endsWith(cleanAlpha) || cleanAlpha.endsWith(sidAlpha)));
+    });
+  }
+
+  public getPublicSampleStudents() {
+    return this.db.students.map(s => {
+      const hasPc = this.db.laptops.some(l => l.studentIdNumber.toLowerCase() === s.studentId.toLowerCase()) ||
+                    this.db.registrations.some(r => r.studentIdNumber.toLowerCase() === s.studentId.toLowerCase() && r.status === 'APPROVED');
+      return {
+        id: s.id,
+        fullName: s.fullName,
+        studentNameAmharic: s.studentNameAmharic,
+        studentId: s.studentId,
+        department: s.department,
+        faculty: s.faculty,
+        hasPc
+      };
+    });
   }
 
   public updateStudent(id: string, updates: Partial<Student>, actor: any) {

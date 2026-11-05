@@ -147,6 +147,115 @@ app.post('/api/v1/auth/login', (req: Request, res: Response) => {
   }
 });
 
+// Unified Login: Accepts either Student ID (for Students) or Security Password (for Staff: Police, Gate, Admin)
+app.post(['/api/v1/auth/unified-login', '/api/v1/auth/student-id-login'], (req: Request, res: Response) => {
+  try {
+    const rawInput = req.body.credential || req.body.studentId || req.body.password;
+    if (!rawInput || typeof rawInput !== 'string') {
+      return res.status(400).json({ error: 'Please enter your Student ID number or staff security password.' });
+    }
+
+    const trimmed = rawInput.trim();
+
+    // 1. Check if the entered value is an authorized staff password
+    const staffUser = dbService.verifyStaffPassword(trimmed);
+    if (staffUser) {
+      const token = createToken(staffUser);
+      dbService.logAudit(
+        staffUser,
+        'STAFF_PASSWORD_LOGIN',
+        'User',
+        staffUser.id,
+        'SUCCESS',
+        `Direct staff login authorized: ${staffUser.fullName} [${staffUser.role}]`
+      );
+      return res.json({
+        token,
+        user: staffUser,
+        role: staffUser.role
+      });
+    }
+
+    // 2. Check if the entered value is a Student ID
+    const student = dbService.getStudentByStudentId(trimmed);
+    if (student) {
+      const allUsers = dbService.getUsers();
+      const user = allUsers.find(
+        u => (u.studentId && u.studentId.toLowerCase() === student.studentId.toLowerCase()) ||
+             u.id === student.userId ||
+             u.email.toLowerCase() === student.institutionalEmail.toLowerCase()
+      );
+
+      if (!user) {
+        return res.status(404).json({ error: 'Student user authentication profile not found.' });
+      }
+
+      const token = createToken(user);
+      dbService.logAudit(
+        user,
+        'STUDENT_ID_LOGIN',
+        'Student',
+        student.id,
+        'SUCCESS',
+        `Student authenticated via ID: ${student.fullName} (${student.studentId}) - [${student.department}]`
+      );
+
+      const laptops = dbService.getLaptops().filter(
+        l => l.studentIdNumber.toLowerCase() === student.studentId.toLowerCase()
+      );
+      const registrations = dbService.getRegistrations().filter(
+        r => r.studentIdNumber.toLowerCase() === student.studentId.toLowerCase() && r.status === 'APPROVED'
+      );
+      const hasRegisteredPc = laptops.length > 0 || registrations.length > 0;
+
+      return res.json({
+        token,
+        user,
+        student,
+        hasRegisteredPc,
+        role: 'STUDENT'
+      });
+    }
+
+    // 3. Fallback: check if matches username/email of a student
+    const studentUser = dbService.getUserByUsernameOrEmail(trimmed);
+    if (studentUser && studentUser.role === 'STUDENT') {
+      const { passwordHash, ...safeUser } = studentUser;
+      const token = createToken(safeUser);
+      return res.json({
+        token,
+        user: safeUser,
+        role: 'STUDENT'
+      });
+    }
+
+    // Not matched
+    dbService.logAudit(
+      { id: 'anonymous', fullName: trimmed, role: 'STUDENT' },
+      'LOGIN_FAILURE',
+      'Credential',
+      trimmed,
+      'FAILURE',
+      `Unrecognized credential entered: ${trimmed}`
+    );
+    return res.status(401).json({
+      error: 'Unrecognized credential. Please enter a valid Hawassa University Student ID (e.g. HU/14022/13) or an authorized staff security password.'
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Error processing authentication' });
+  }
+});
+
+// Sample Students list for quick testing on login page
+app.get('/api/v1/auth/sample-students', (_req: Request, res: Response) => {
+  try {
+    const students = dbService.getPublicSampleStudents();
+    res.json(students);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Error loading sample students' });
+  }
+});
+
 app.get('/api/v1/auth/me', authenticate, (req: Request, res: Response) => {
   const user = (req as any).user;
   res.json({ user });
